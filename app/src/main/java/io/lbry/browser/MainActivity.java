@@ -62,8 +62,6 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -222,9 +220,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     @Setter
     private BackPressInterceptor backPressInterceptor;
 
-    @Getter
-    private String firebaseMessagingToken;
-
     private Map<String, Fragment> openNavFragments;
     private static final Map<Class, Integer> fragmentClassNavIdMap = new HashMap<>();
     static {
@@ -380,20 +375,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         initSpecialRouteMap();
 
         LbryAnalytics.init(this);
-        try {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                @Override
-                public void onComplete(Task<InstanceIdResult> task) {
-                    if (!task.isSuccessful()) {
-                        return;
-                    }
-                    // Get new Instance ID token
-                    firebaseMessagingToken = task.getResult().getToken();
-                }
-            });
-        } catch (IllegalStateException ex) {
-            // pass
-        }
 
         super.onCreate(savedInstanceState);
         dbHelper = new DatabaseHelper(this);
