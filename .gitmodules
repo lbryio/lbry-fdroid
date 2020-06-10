@@ -1,4 +1,0 @@
-
-[submodule "lbry-android-sdk"]
-	path = lbry-android-sdk
-	url = https://github.com/lbryio/lbry-android-sdk
