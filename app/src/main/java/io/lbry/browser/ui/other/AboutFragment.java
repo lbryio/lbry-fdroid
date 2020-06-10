@@ -21,8 +21,6 @@ import androidx.preference.PreferenceManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONObject;
 
@@ -198,12 +196,6 @@ public class AboutFragment extends BaseFragment implements SdkStatusListener {
                 onSdkReady();
             }
         }
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(Task<InstanceIdResult> task) {
-                Helper.setViewText(textFirebaseToken, task.isSuccessful() ? task.getResult().getToken() : getString(R.string.unknown));
-            }
-        });
 
     }
 
