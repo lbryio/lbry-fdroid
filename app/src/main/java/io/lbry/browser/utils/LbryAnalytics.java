@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
-
 public class LbryAnalytics {
 
     public static final String EVENT_APP_ERROR = "app_error";
@@ -28,23 +26,15 @@ public class LbryAnalytics {
     public static final String EVENT_CHANNEL_CREATE = "channel_create";
     public static final String EVENT_SEARCH = "search";
 
-    private static FirebaseAnalytics analytics;
-
     public static void init(Context context) {
-        analytics = FirebaseAnalytics.getInstance(context);
+
     }
 
     public static void checkInitAnalytics(Context context) {
-        if (analytics == null && context != null) {
-            analytics = FirebaseAnalytics.getInstance(context);
-        }
     }
 
     public static void setCurrentScreen(Activity activity, String name, String className) {
         checkInitAnalytics(activity);
-        if (analytics != null) {
-            analytics.setCurrentScreen(activity, name, className);
-        }
     }
 
     public static void logEvent(String name) {
@@ -52,9 +42,6 @@ public class LbryAnalytics {
     }
 
     public static void logEvent(String name, Bundle bundle) {
-        if (analytics != null) {
-            analytics.logEvent(name, bundle);
-        }
     }
 
     public static void logError(String message, String exceptionName) {
