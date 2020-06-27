@@ -56,7 +56,6 @@ public class AboutFragment extends BaseFragment implements SdkStatusListener {
     private TextView textLbrySdkVersion;
     private TextView textPlatform;
     private TextView textInstallationId;
-    private TextView textFirebaseToken;
     private View linkSendLog;
     private View linkUpdateMailingPreferences;
 
@@ -87,7 +86,6 @@ public class AboutFragment extends BaseFragment implements SdkStatusListener {
         textLbrySdkVersion = root.findViewById(R.id.about_lbry_sdk);
         textPlatform = root.findViewById(R.id.about_platform);
         textInstallationId = root.findViewById(R.id.about_installation_id);
-        textFirebaseToken = root.findViewById(R.id.about_firebase_token);
         linkSendLog = root.findViewById(R.id.about_send_log);
         linkUpdateMailingPreferences = root.findViewById(R.id.about_update_mailing_preferences);
 
