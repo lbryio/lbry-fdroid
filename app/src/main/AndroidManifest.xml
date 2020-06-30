@@ -60,14 +60,6 @@
             android:theme="@style/AppTheme.NoActionBarTranslucent"
             android:windowSoftInputMode="adjustResize" />
 
-        <service
-            android:name="io.lbry.browser.LbrynetMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <provider
             android:name="io.lbry.browser.LocalFileProvider"
             android:authorities="io.lbry.browser.fileprovider"
