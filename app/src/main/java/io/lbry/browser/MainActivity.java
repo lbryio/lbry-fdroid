@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static final String SECURE_VALUE_KEY_SAVED_PASSWORD = "io.lbry.browser.PX";
     public static final String SECURE_VALUE_FIRST_RUN_PASSWORD = "firstRunPassword";
 
-    private static final String TAG = "io.lbry.browser.Main";
+    private static final String TAG = "LbryMain";
 
     private NavigationMenuAdapter navMenuAdapter;
     private UrlSuggestionListAdapter urlSuggestionListAdapter;
@@ -1548,7 +1548,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
         findViewById(R.id.global_sdk_initializing_status).setVisibility(View.GONE);
 
-        syncWalletAndLoadPreferences();
         scheduleWalletBalanceUpdate();
         scheduleWalletSyncTask();
         fetchOwnChannels();
@@ -1766,7 +1765,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                     //openNavFragments.get
                     MergeSubscriptionsTask mergeTask = new MergeSubscriptionsTask(
                             subscriptions,
-                            !initialSubscriptionMergeDone(),
+                            initialSubscriptionMergeDone(),
                             MainActivity.this, new MergeSubscriptionsTask.MergeSubscriptionsHandler() {
                         @Override
                         public void onSuccess(List<Subscription> subscriptions, List<Subscription> diff) {
@@ -1781,7 +1780,9 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                             for (Fragment fragment : openNavFragments.values()) {
                                 if (fragment instanceof FollowingFragment) {
                                     // reload local subscriptions
-                                    ((FollowingFragment) fragment).fetchLoadedSubscriptions(true);
+                                    Lbryio.cacheResolvedSubscriptions.clear();
+                                    FollowingFragment followingFragment = (FollowingFragment) fragment;
+                                    followingFragment.fetchLoadedSubscriptions(true);
                                 }
                             }
                         }
@@ -1919,7 +1920,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             public void onSyncGetSuccess(WalletSync walletSync) {
                 Lbryio.lastWalletSync = walletSync;
                 Lbryio.lastRemoteHash = walletSync.getHash();
-                loadSharedUserState();
             }
 
             @Override
@@ -2625,7 +2625,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         LbryAnalytics.logEvent(LbryAnalytics.EVENT_LBRY_NOTIFICATION_OPEN, bundle);
     }
 
-
     private void registerServiceActionsReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_EVENT);
@@ -2787,9 +2786,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                     JSONObject startupStatus = status.getJSONObject("startup_status");
                     sdkReady = startupStatus.getBoolean("file_manager") && startupStatus.getBoolean("wallet");
                 }
-            } catch (ConnectException ex) {
-                // pass
-            } catch (JSONException ex) {
+            } catch (ConnectException | JSONException ex) {
                 // pass
             }
 
