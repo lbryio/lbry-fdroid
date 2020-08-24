@@ -47,6 +47,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -113,6 +120,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.lbry.browser.adapter.NavigationMenuAdapter;
+import io.lbry.browser.adapter.NotificationListAdapter;
 import io.lbry.browser.adapter.UrlSuggestionListAdapter;
 import io.lbry.browser.data.DatabaseHelper;
 import io.lbry.browser.dialog.ContentScopeDialogFragment;
@@ -135,16 +143,22 @@ import io.lbry.browser.model.Tag;
 import io.lbry.browser.model.UrlSuggestion;
 import io.lbry.browser.model.WalletBalance;
 import io.lbry.browser.model.WalletSync;
+import io.lbry.browser.model.lbryinc.LbryNotification;
 import io.lbry.browser.model.lbryinc.Reward;
+import io.lbry.browser.model.lbryinc.RewardVerified;
 import io.lbry.browser.model.lbryinc.Subscription;
 import io.lbry.browser.tasks.GenericTaskHandler;
+import io.lbry.browser.tasks.RewardVerifiedHandler;
 import io.lbry.browser.tasks.claim.ClaimListResultHandler;
 import io.lbry.browser.tasks.claim.ClaimListTask;
+import io.lbry.browser.tasks.lbryinc.AndroidPurchaseTask;
 import io.lbry.browser.tasks.lbryinc.ClaimRewardTask;
 import io.lbry.browser.tasks.lbryinc.FetchRewardsTask;
 import io.lbry.browser.tasks.LighthouseAutoCompleteTask;
 import io.lbry.browser.tasks.MergeSubscriptionsTask;
 import io.lbry.browser.tasks.claim.ResolveTask;
+import io.lbry.browser.tasks.lbryinc.NotificationListTask;
+import io.lbry.browser.tasks.lbryinc.NotificationUpdateTask;
 import io.lbry.browser.tasks.localdata.FetchRecentUrlHistoryTask;
 import io.lbry.browser.tasks.wallet.DefaultSyncTaskHandler;
 import io.lbry.browser.tasks.wallet.LoadSharedUserStateTask;
@@ -186,7 +200,13 @@ import lombok.Setter;
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity implements SdkStatusListener {
+    private static final String CHANNEL_ID_PLAYBACK = "io.lbry.browser.LBRY_PLAYBACK_CHANNEL";
+    private static final int PLAYBACK_NOTIFICATION_ID = 3;
+    private static final String SPECIAL_URL_PREFIX = "lbry://?";
+    private static final int REMOTE_NOTIFICATION_REFRESH_TTL = 300000; // 5 minutes
+    public static final String SKU_SKIP = "lbryskip";
 
+    private Date remoteNotifcationsLastLoaded;
     private Map<String, Class> specialRouteFragmentClassMap;
     @Getter
     private boolean inPictureInPictureMode;
@@ -208,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static boolean startingPermissionRequest = false;
     public static boolean startingSignInFlowActivity = false;
 
-
+    private BillingClient billingClient;
     @Getter
     private boolean enteringPIPMode = false;
     private boolean fullSyncInProgress = false;
@@ -218,6 +238,8 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     @Setter
     private BackPressInterceptor backPressInterceptor;
+
+    private NotificationListAdapter notificationListAdapter;
 
     private Map<String, Fragment> openNavFragments;
     private static final Map<Class, Integer> fragmentClassNavIdMap = new HashMap<>();
@@ -277,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static final String PREFERENCE_KEY_DARK_MODE = "io.lbry.browser.preference.userinterface.DarkMode";
     public static final String PREFERENCE_KEY_SHOW_MATURE_CONTENT = "io.lbry.browser.preference.userinterface.ShowMatureContent";
     public static final String PREFERENCE_KEY_SHOW_URL_SUGGESTIONS = "io.lbry.browser.preference.userinterface.UrlSuggestions";
+    public static final String PREFERENCE_KEY_NOTIFICATION_COMMENTS = "io.lbry.browser.preference.notifications.Comments";
     public static final String PREFERENCE_KEY_NOTIFICATION_SUBSCRIPTIONS = "io.lbry.browser.preference.notifications.Subscriptions";
     public static final String PREFERENCE_KEY_NOTIFICATION_REWARDS = "io.lbry.browser.preference.notifications.Rewards";
     public static final String PREFERENCE_KEY_NOTIFICATION_CONTENT_INTERESTS = "io.lbry.browser.preference.notifications.ContentInterests";
@@ -383,6 +406,24 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // setup the billing client in main activity (to handle cases where the verification purchase flow may have been interrupted)
+        billingClient = BillingClient.newBuilder(this)
+                .setListener(new PurchasesUpdatedListener() {
+                    @Override
+                    public void onPurchasesUpdated(@NonNull BillingResult billingResult, @Nullable List<Purchase> purchases) {
+                        int responseCode = billingResult.getResponseCode();
+                        if (responseCode == BillingClient.BillingResponseCode.OK && purchases != null)
+                        {
+                            for (Purchase purchase : purchases) {
+                                handlePurchase(purchase);
+                            }
+                        }
+                    }
+                })
+                .enablePendingPurchases()
+                .build();
+        establishBillingClientConnection();
+
         playerNotificationManager = new PlayerNotificationManager(
                 this, LbrynetService.NOTIFICATION_CHANNEL_ID, PLAYBACK_NOTIFICATION_ID, new PlayerNotificationDescriptionAdapter());
 
@@ -420,6 +461,8 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
         // setup uri bar
         setupUriBar();
+        initNotificationsPage();
+        loadUnreadNotificationsCount();
 
         // other
         pendingSyncSetQueue = new ArrayList<>();
@@ -456,6 +499,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 if (slideOffset != 0) {
                     clearWunderbarFocus(findViewById(R.id.wunderbar));
+                    hideNotifications();
                 }
                 super.onDrawerSlide(drawerView, slideOffset);
             }
@@ -484,10 +528,23 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             }
         });
 
+        findViewById(R.id.wunderbar_notifications).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                View container = findViewById(R.id.notifications_container);
+                if (container.getVisibility() != View.VISIBLE) {
+                    showNotifications();
+                } else {
+                    hideNotifications();
+                }
+            }
+        });
+
         findViewById(R.id.global_now_playing_card).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (nowPlayingClaim != null && !Helper.isNullOrEmpty(nowPlayingClaimUrl)) {
+                    hideNotifications();
                     openFileUrl(nowPlayingClaimUrl);
                 }
             }
@@ -532,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     public boolean isBackgroundPlaybackEnabled() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        return sp.getBoolean(PREFERENCE_KEY_BACKGROUND_PLAYBACK, false);
+        return sp.getBoolean(PREFERENCE_KEY_BACKGROUND_PLAYBACK, true);
     }
 
     public boolean initialSubscriptionMergeDone() {
@@ -698,8 +755,9 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     }
 
     private void openSelectedMenuItem() {
+        hideNotifications();
+
         switch (selectedMenuItemId) {
-            // TODO: reverse map lookup for class?
             case NavMenuItem.ID_ITEM_FOLLOWING:
                 openFragment(FollowingFragment.class, true, NavMenuItem.ID_ITEM_FOLLOWING);
                 break;
@@ -814,6 +872,21 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         Map<String, Object> params = new HashMap<>();
         params.put("url", url);
         openFragment(FileViewFragment.class, true, NavMenuItem.ID_ITEM_FOLLOWING, params);
+    }
+
+    private void openSpecialUrl(String url) {
+        String specialPath = url.substring(8).toLowerCase();
+        if (specialRouteFragmentClassMap.containsKey(specialPath)) {
+            Class fragmentClass = specialRouteFragmentClassMap.get(specialPath);
+            if (fragmentClassNavIdMap.containsKey(fragmentClass)) {
+                openFragment(
+                        specialRouteFragmentClassMap.get(specialPath),
+                        true,
+                        fragmentClassNavIdMap.get(fragmentClass),
+                        null
+                );
+            }
+        }
     }
 
     public void openSendTo(String path) {
@@ -982,6 +1055,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     @Override
     protected void onResume() {
         super.onResume();
+        checkPurchases();
         enteringPIPMode = false;
 
         applyNavbarSigninPadding();
@@ -1002,6 +1076,33 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         /*if (Lbry.SDK_READY) {
             findViewById(R.id.global_sdk_initializing_status).setVisibility(View.GONE);
         }*/
+    }
+
+    private void checkPurchases() {
+        if (billingClient != null) {
+            Purchase.PurchasesResult result = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
+            if (result.getPurchasesList() != null) {
+                for (Purchase purchase : result.getPurchasesList()) {
+                    handlePurchase(purchase);
+                }
+            }
+        }
+    }
+
+    private void handlePurchase(Purchase purchase) {
+        handleBillingPurchase(purchase, billingClient, MainActivity.this, null, new RewardVerifiedHandler() {
+            @Override
+            public void onSuccess(RewardVerified rewardVerified) {
+                if (Lbryio.currentUser != null) {
+                    Lbryio.currentUser.setRewardApproved(rewardVerified.isRewardApproved());
+                }
+            }
+
+            @Override
+            public void onError(Exception error) {
+                // pass
+            }
+        });
     }
 
     private void checkPendingOpens() {
@@ -1048,7 +1149,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         View container = findViewById(R.id.url_suggestions_container);
         View closeIcon = findViewById(R.id.wunderbar_close);
         EditText wunderbar = findViewById(R.id.wunderbar);
-        wunderbar.setPadding(0, 0, visible ? getScaledValue(36) : 0, 0);
+        //wunderbar.setPadding(0, 0, visible ? getScaledValue(36) : 0, 0);
 
         container.setVisibility(visible ? View.VISIBLE : View.GONE);
         closeIcon.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -1083,8 +1184,13 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus) {
+                    hideNotifications();
+                    findViewById(R.id.wunderbar_notifications).setVisibility(View.INVISIBLE);
+
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(view, 0);
+                } else {
+                    findViewById(R.id.wunderbar_notifications).setVisibility(View.VISIBLE);
                 }
 
                 if (canShowUrlSuggestions()) {
@@ -1614,8 +1720,13 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         mediaSession.setActive(true);
     }
 
-    private static final String CHANNEL_ID_PLAYBACK = "io.lbry.browser.LBRY_PLAYBACK_CHANNEL";
-    private static final int PLAYBACK_NOTIFICATION_ID = 3;
+    public void initNotificationsPage() {
+        findViewById(R.id.notification_list_empty_container).setVisibility(View.VISIBLE);
+
+        RecyclerView notificationsList = findViewById(R.id.notifications_list);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        notificationsList.setLayoutManager(llm);
+    }
 
     public void initPlaybackNotification() {
         if (isBackgroundPlaybackEnabled()) {
@@ -1987,6 +2098,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         intentFilter.addAction(ACTION_OPEN_REWARDS_PAGE);
         intentFilter.addAction(ACTION_PUBLISH_SUCCESSFUL);
         intentFilter.addAction(ACTION_SAVE_SHARED_USER_STATE);
+        intentFilter.addAction(LbrynetMessagingService.ACTION_NOTIFICATION_RECEIVED);
         requestsReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -2007,7 +2119,13 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                     saveSharedUserState();
                 } else if (ACTION_PUBLISH_SUCCESSFUL.equalsIgnoreCase(action)) {
                     openPublishesOnSuccessfulPublish();
+                } else if (LbrynetMessagingService.ACTION_NOTIFICATION_RECEIVED.equalsIgnoreCase(action)) {
+                    handleNotificationReceived(intent);
                 }
+            }
+
+            private void handleNotificationReceived(Intent intent) {
+                loadRemoteNotifications(false);
             }
 
             private void handleAuthTokenGenerated(Intent intent) {
@@ -2052,11 +2170,65 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                 setBackgroundTint(Color.RED).setTextColor(Color.WHITE).show();
     }
 
+    public void showNotifications() {
+        clearWunderbarFocus(findViewById(R.id.wunderbar));
+        findViewById(R.id.notifications_container).setVisibility(View.VISIBLE);
+        ((ImageView) findViewById(R.id.notifications_toggle_icon)).setColorFilter(ContextCompat.getColor(this, R.color.lbryGreen));
+        if (remoteNotifcationsLastLoaded == null ||
+                (System.currentTimeMillis() - remoteNotifcationsLastLoaded.getTime() > REMOTE_NOTIFICATION_REFRESH_TTL)) {
+            loadRemoteNotifications(true);
+        }
+
+        if (notificationListAdapter != null) {
+            markNotificationsRead();
+        }
+    }
+
+    public void hideNotifications() {
+        ((ImageView) findViewById(R.id.notifications_toggle_icon)).setColorFilter(ContextCompat.getColor(this, R.color.actionBarForeground));
+        findViewById(R.id.notifications_container).setVisibility(View.GONE);
+    }
+
+    private void markNotificationsRead() {
+        List<LbryNotification> all = notificationListAdapter != null ? notificationListAdapter.getItems() : null;
+        if (all != null) {
+            List<Long> unreadIds = new ArrayList<>();
+            for (LbryNotification notification : all) {
+                if (!notification.isRead() && notification.getRemoteId() > 0) {
+                    unreadIds.add(notification.getRemoteId());
+                }
+            }
+            if (unreadIds.size() > 0) {
+                NotificationUpdateTask task = new NotificationUpdateTask(unreadIds, true);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        }
+
+
+        (new AsyncTask<Void, Void, Void>() {
+            protected Void doInBackground(Void... params) {
+                try {
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    DatabaseHelper.markNotificationsRead(db);
+                } catch (Exception ex) {
+                    // pass
+                }
+                return null;
+            }
+            protected void onPostExecute(Void result) {
+                loadUnreadNotificationsCount();
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     @Override
     public void onBackPressed() {
-
         if (findViewById(R.id.url_suggestions_container).getVisibility() == View.VISIBLE) {
             clearWunderbarFocus(findViewById(R.id.wunderbar));
+            return;
+        }
+        if (findViewById(R.id.notifications_container).getVisibility() == View.VISIBLE) {
+            hideNotifications();
             return;
         }
         if (backPressInterceptor != null && backPressInterceptor.onBackPressed()) {
@@ -2426,8 +2598,8 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                         startupStages.put(STARTUP_STAGE_SUBSCRIPTIONS_RESOLVED, true);
                     }
                 } catch (Exception ex) {
-                    // nope
-                    android.util.Log.e(TAG, String.format("App startup failed: %s", ex.getMessage()), ex);
+                    // nopecd
+                    Log.e(TAG, String.format("App startup failed: %s", ex.getMessage()), ex);
                     return false;
                 } finally {
                     Helper.closeCloseable(reader);
@@ -2454,6 +2626,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                 loadLastFragment();
                 showSignedInUser();
                 fetchRewards();
+                loadRemoteNotifications(false);
 
                 checkUrlIntent(getIntent());
                 LbryAnalytics.logEvent(LbryAnalytics.EVENT_APP_LAUNCH);
@@ -2515,7 +2688,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             if (data != null) {
                 String url = data.toString();
                 // check special urls
-                if (url.startsWith("lbry://?")) {
+                if (url.startsWith(SPECIAL_URL_PREFIX)) {
                     String specialPath = url.substring(8).toLowerCase();
                     if (specialRouteFragmentClassMap.containsKey(specialPath)) {
                         Class fragmentClass = specialRouteFragmentClassMap.get(specialPath);
@@ -3032,6 +3205,155 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    private void displayUnreadNotificationCount(int count) {
+        String text = count > 99 ? "99+" : String.valueOf(count);
+
+        TextView badge = findViewById(R.id.notifications_badge_count);
+        badge.setVisibility(count > 0 ? View.VISIBLE : View.INVISIBLE);
+        badge.setText(text);
+    }
+
+    private void loadUnreadNotificationsCount() {
+        (new AsyncTask<Void, Void, Integer>() {
+            @Override
+            protected Integer doInBackground(Void... params) {
+                try {
+                    SQLiteDatabase db = dbHelper.getReadableDatabase();
+                    return DatabaseHelper.getUnreadNotificationsCount(db);
+                } catch (Exception ex) {
+                    return 0;
+                }
+            }
+            protected void onPostExecute(Integer count) {
+                displayUnreadNotificationCount(count);
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void loadRemoteNotifications(boolean markRead) {
+        findViewById(R.id.notification_list_empty_container).setVisibility(View.GONE);
+        NotificationListTask task = new NotificationListTask(this, findViewById(R.id.notifications_progress), new NotificationListTask.ListNotificationsHandler() {
+            @Override
+            public void onSuccess(List<LbryNotification> notifications) {
+                remoteNotifcationsLastLoaded = new Date();
+
+                loadUnreadNotificationsCount();
+                loadLocalNotifications();
+                if (markRead && findViewById(R.id.notifications_container).getVisibility() == View.VISIBLE) {
+                    markNotificationsRead();
+                }
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                // pass
+                Log.e(TAG, "error loading remote notifications", exception);
+                loadLocalNotifications();
+            }
+        });
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void loadLocalNotifications() {
+        (new AsyncTask<Void, Void, List<LbryNotification>>() {
+            protected void onPreExecute() {
+                findViewById(R.id.notification_list_empty_container).setVisibility(View.GONE);
+                findViewById(R.id.notifications_progress).setVisibility(View.VISIBLE);
+            }
+            @Override
+            protected List<LbryNotification> doInBackground(Void... params) {
+                List<LbryNotification> notifications = new ArrayList<>();
+                try {
+                    SQLiteDatabase db = dbHelper.getReadableDatabase();
+                    notifications = DatabaseHelper.getNotifications(db);
+                } catch (Exception ex) {
+                    // pass
+                }
+                return notifications;
+            }
+            protected void onPostExecute(List<LbryNotification> notifications) {
+                findViewById(R.id.notification_list_empty_container).setVisibility(notifications.size() == 0 ? View.VISIBLE : View.GONE);
+                findViewById(R.id.notifications_progress).setVisibility(View.GONE);
+                loadUnreadNotificationsCount();
+
+                if (notificationListAdapter == null) {
+                    notificationListAdapter = new NotificationListAdapter(notifications, MainActivity.this);
+                    ((RecyclerView) findViewById(R.id.notifications_list)).setAdapter(notificationListAdapter);
+                } else {
+                    notificationListAdapter.addNotifications(notifications);
+                }
+
+                resolveCommentAuthors(notificationListAdapter.getAuthorUrls());
+                notificationListAdapter.setClickListener(new NotificationListAdapter.NotificationClickListener() {
+                    @Override
+                    public void onNotificationClicked(LbryNotification notification) {
+                        // set as seen and read
+                        NotificationUpdateTask task = new NotificationUpdateTask(Arrays.asList(notification.getRemoteId()), true, true, true);
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        markNotificationReadAndSeen(notification.getId());
+                        notification.setSeen(true);
+                        if (notificationListAdapter != null) {
+                            notificationListAdapter.notifyDataSetChanged();
+                        }
+
+                        String targetUrl = notification.getTargetUrl();
+                        if (targetUrl.startsWith(SPECIAL_URL_PREFIX)) {
+                            openSpecialUrl(targetUrl);
+                        } else {
+                            LbryUri target = LbryUri.tryParse(notification.getTargetUrl());
+                            if (target != null) {
+                                if (target.isChannel()) {
+                                    openChannelUrl(notification.getTargetUrl());
+                                } else {
+                                    openFileUrl(notification.getTargetUrl());
+                                }
+                            }
+                        }
+                        hideNotifications();
+                    }
+                });
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void markNotificationReadAndSeen(long notificationId) {
+        (new AsyncTask<Void, Void, Void>() {
+            protected Void doInBackground(Void... params) {
+                if (dbHelper != null) {
+                    try {
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        DatabaseHelper.markNotificationReadAndSeen(notificationId, db);
+                    } catch (Exception ex) {
+                        // pass
+                    }
+                }
+                return null;
+            }
+            protected void onPostExecute() {
+                loadUnreadNotificationsCount();
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void resolveCommentAuthors(List<String> urls) {
+        if (urls != null && urls.size() > 0) {
+            ResolveTask task = new ResolveTask(urls, Lbry.LBRY_TV_CONNECTION_STRING, null, new ClaimListResultHandler() {
+                @Override
+                public void onSuccess(List<Claim> claims) {
+                    if (notificationListAdapter != null) {
+                        notificationListAdapter.updateAuthorClaims(claims);
+                    }
+                }
+
+                @Override
+                public void onError(Exception error) {
+                    // pass
+                }
+            });
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+    }
+
     private void checkSyncedWallet() {
         String password = Utils.getSecureValue(SECURE_VALUE_KEY_SAVED_PASSWORD, this, Lbry.KEYSTORE);
         // Just check if the current user has a synced wallet, no need to do anything else here
@@ -3073,6 +3395,53 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             return false;
         }
         return (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void establishBillingClientConnection() {
+        if (billingClient != null) {
+            billingClient.startConnection(new BillingClientStateListener() {
+                @Override
+                public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        // no need to do anything here. purchases are always checked server-side
+                        checkPurchases();
+                    }
+                }
+
+                @Override
+                public void onBillingServiceDisconnected() {
+                    establishBillingClientConnection();
+                }
+            });
+        }
+    }
+
+    public static void handleBillingPurchase(
+            Purchase purchase,
+            BillingClient billingClient,
+            Context context,
+            View progressView,
+            RewardVerifiedHandler handler) {
+        String sku = purchase.getSku();
+        if (SKU_SKIP.equalsIgnoreCase(sku)) {
+            // send purchase token for verification
+            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED
+                /*&& isSignatureValid(purchase)*/) {
+                // consume the purchase
+                String purchaseToken = purchase.getPurchaseToken();
+                ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build();
+                billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
+                    @Override
+                    public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
+
+                    }
+                });
+
+                // send the purchase token to the backend to complete verification
+                AndroidPurchaseTask task = new AndroidPurchaseTask(purchaseToken, progressView, context, handler);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        }
     }
 
     public interface BackPressInterceptor {

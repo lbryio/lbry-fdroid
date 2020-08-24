@@ -70,6 +70,7 @@ public final class Helper {
     public static final String METHOD_GET = "GET";
     public static final String METHOD_POST = "POST";
     public static final String ISO_DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    public static final String ISO_DATE_FORMAT_JSON = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     public static final String SDK_AMOUNT_FORMAT = "0.0#######";
     public static final MediaType FORM_MEDIA_TYPE = MediaType.parse("application/x-www-form-urlencoded");
     public static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
@@ -126,6 +127,16 @@ public final class Helper {
         String delim = "";
         for (String s : list) {
             sb.append(delim).append(s);
+            delim = delimiter;
+        }
+        return sb.toString();
+    }
+
+    public static String joinL(List<Long> list, String delimiter) {
+        StringBuilder sb = new StringBuilder();
+        String delim = "";
+        for (Long item : list) {
+            sb.append(delim).append(item);
             delim = delimiter;
         }
         return sb.toString();
