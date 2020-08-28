@@ -67,7 +67,7 @@
         <SwitchPreferenceCompat
             app:key="io.lbry.browser.preference.other.SendBufferingEvents"
             app:title="@string/send_buffering_events"
-            app:defaultValue="true"
+            app:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
     </PreferenceCategory>

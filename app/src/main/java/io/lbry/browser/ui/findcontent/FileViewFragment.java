@@ -299,11 +299,11 @@ public class FileViewFragment extends BaseFragment implements
                     }
                 } else if (playbackState == Player.STATE_BUFFERING) {
                     Context ctx = getContext();
-                    boolean sendBufferingEvents = true;
+                    boolean sendBufferingEvents = false;
 
                     if (ctx != null) {
                         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-                        sendBufferingEvents = sp.getBoolean(MainActivity.PREFERENCE_KEY_SEND_BUFFERING_EVENTS, true);
+                        sendBufferingEvents = sp.getBoolean(MainActivity.PREFERENCE_KEY_SEND_BUFFERING_EVENTS, false);
                     }
 
                     if (MainActivity.appPlayer != null && MainActivity.appPlayer.getCurrentPosition() > 0 && sendBufferingEvents) {
