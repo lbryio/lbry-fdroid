@@ -47,13 +47,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.ConsumeParams;
-import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -65,8 +58,6 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.cache.Cache;
 import com.google.android.gms.cast.framework.CastContext;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
@@ -145,13 +136,10 @@ import io.lbry.browser.model.WalletBalance;
 import io.lbry.browser.model.WalletSync;
 import io.lbry.browser.model.lbryinc.LbryNotification;
 import io.lbry.browser.model.lbryinc.Reward;
-import io.lbry.browser.model.lbryinc.RewardVerified;
 import io.lbry.browser.model.lbryinc.Subscription;
 import io.lbry.browser.tasks.GenericTaskHandler;
-import io.lbry.browser.tasks.RewardVerifiedHandler;
 import io.lbry.browser.tasks.claim.ClaimListResultHandler;
 import io.lbry.browser.tasks.claim.ClaimListTask;
-import io.lbry.browser.tasks.lbryinc.AndroidPurchaseTask;
 import io.lbry.browser.tasks.lbryinc.ClaimRewardTask;
 import io.lbry.browser.tasks.lbryinc.FetchRewardsTask;
 import io.lbry.browser.tasks.LighthouseAutoCompleteTask;
@@ -204,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     private static final int PLAYBACK_NOTIFICATION_ID = 3;
     private static final String SPECIAL_URL_PREFIX = "lbry://?";
     private static final int REMOTE_NOTIFICATION_REFRESH_TTL = 300000; // 5 minutes
-    public static final String SKU_SKIP = "lbryskip";
 
     private Date remoteNotifcationsLastLoaded;
     private Map<String, Class> specialRouteFragmentClassMap;
@@ -228,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static boolean startingPermissionRequest = false;
     public static boolean startingSignInFlowActivity = false;
 
-    private BillingClient billingClient;
     @Getter
     private boolean enteringPIPMode = false;
     private boolean fullSyncInProgress = false;
@@ -405,24 +391,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // setup the billing client in main activity (to handle cases where the verification purchase flow may have been interrupted)
-        billingClient = BillingClient.newBuilder(this)
-                .setListener(new PurchasesUpdatedListener() {
-                    @Override
-                    public void onPurchasesUpdated(@NonNull BillingResult billingResult, @Nullable List<Purchase> purchases) {
-                        int responseCode = billingResult.getResponseCode();
-                        if (responseCode == BillingClient.BillingResponseCode.OK && purchases != null)
-                        {
-                            for (Purchase purchase : purchases) {
-                                handlePurchase(purchase);
-                            }
-                        }
-                    }
-                })
-                .enablePendingPurchases()
-                .build();
-        establishBillingClientConnection();
 
         playerNotificationManager = new PlayerNotificationManager(
                 this, LbrynetService.NOTIFICATION_CHANNEL_ID, PLAYBACK_NOTIFICATION_ID, new PlayerNotificationDescriptionAdapter());
@@ -1055,7 +1023,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     @Override
     protected void onResume() {
         super.onResume();
-        checkPurchases();
         enteringPIPMode = false;
 
         applyNavbarSigninPadding();
@@ -1076,33 +1043,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         /*if (Lbry.SDK_READY) {
             findViewById(R.id.global_sdk_initializing_status).setVisibility(View.GONE);
         }*/
-    }
-
-    private void checkPurchases() {
-        if (billingClient != null) {
-            Purchase.PurchasesResult result = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-            if (result.getPurchasesList() != null) {
-                for (Purchase purchase : result.getPurchasesList()) {
-                    handlePurchase(purchase);
-                }
-            }
-        }
-    }
-
-    private void handlePurchase(Purchase purchase) {
-        handleBillingPurchase(purchase, billingClient, MainActivity.this, null, new RewardVerifiedHandler() {
-            @Override
-            public void onSuccess(RewardVerified rewardVerified) {
-                if (Lbryio.currentUser != null) {
-                    Lbryio.currentUser.setRewardApproved(rewardVerified.isRewardApproved());
-                }
-            }
-
-            @Override
-            public void onError(Exception error) {
-                // pass
-            }
-        });
     }
 
     private void checkPendingOpens() {
@@ -2098,7 +2038,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         intentFilter.addAction(ACTION_OPEN_REWARDS_PAGE);
         intentFilter.addAction(ACTION_PUBLISH_SUCCESSFUL);
         intentFilter.addAction(ACTION_SAVE_SHARED_USER_STATE);
-        intentFilter.addAction(LbrynetMessagingService.ACTION_NOTIFICATION_RECEIVED);
         requestsReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -2119,8 +2058,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                     saveSharedUserState();
                 } else if (ACTION_PUBLISH_SUCCESSFUL.equalsIgnoreCase(action)) {
                     openPublishesOnSuccessfulPublish();
-                } else if (LbrynetMessagingService.ACTION_NOTIFICATION_RECEIVED.equalsIgnoreCase(action)) {
-                    handleNotificationReceived(intent);
                 }
             }
 
@@ -3395,53 +3332,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             return false;
         }
         return (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
-    }
-
-    private void establishBillingClientConnection() {
-        if (billingClient != null) {
-            billingClient.startConnection(new BillingClientStateListener() {
-                @Override
-                public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
-                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                        // no need to do anything here. purchases are always checked server-side
-                        checkPurchases();
-                    }
-                }
-
-                @Override
-                public void onBillingServiceDisconnected() {
-                    establishBillingClientConnection();
-                }
-            });
-        }
-    }
-
-    public static void handleBillingPurchase(
-            Purchase purchase,
-            BillingClient billingClient,
-            Context context,
-            View progressView,
-            RewardVerifiedHandler handler) {
-        String sku = purchase.getSku();
-        if (SKU_SKIP.equalsIgnoreCase(sku)) {
-            // send purchase token for verification
-            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED
-                /*&& isSignatureValid(purchase)*/) {
-                // consume the purchase
-                String purchaseToken = purchase.getPurchaseToken();
-                ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build();
-                billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
-                    @Override
-                    public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
-
-                    }
-                });
-
-                // send the purchase token to the backend to complete verification
-                AndroidPurchaseTask task = new AndroidPurchaseTask(purchaseToken, progressView, context, handler);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }
     }
 
     public interface BackPressInterceptor {

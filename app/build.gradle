@@ -40,17 +40,7 @@ android {
     }
 
     buildTypes {
-        debug {
-            Properties twitterProps = new Properties()
-            twitterProps.load(project.file('twitter.properties').newDataInputStream())
-            resValue "string", "TWITTER_CONSUMER_KEY",  "\"${twitterProps.getProperty("twitterConsumerKey")}\""
-            resValue "string", "TWITTER_CONSUMER_SECRET", "\"${twitterProps.getProperty("twitterConsumerSecret")}\""
-        }
         release {
-            Properties twitterProps = new Properties()
-            twitterProps.load(project.file('twitter.properties').newDataInputStream())
-            resValue "string", "TWITTER_CONSUMER_KEY",  "\"${twitterProps.getProperty("twitterConsumerKey")}\""
-            resValue "string", "TWITTER_CONSUMER_SECRET", "\"${twitterProps.getProperty("twitterConsumerSecret")}\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -92,9 +82,6 @@ dependencies {
 
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'com.squareup.okhttp3:okhttp:4.4.1'
-    implementation 'com.google.oauth-client:google-oauth-client:1.30.4'
-
-    implementation 'com.android.billingclient:billing:3.0.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.11.4'

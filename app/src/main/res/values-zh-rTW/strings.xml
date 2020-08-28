@@ -374,12 +374,7 @@
     <string name="not_interested">不感興趣</string>
     <string name="manual_reward_verification">手動認證獎賞</string>
     <string name="reward_verification">認證獎賞</string>
-    <string name="social_media_verification">社交網路認證</string>
-    <string name="skip_the_queue">跳過等待</string>
     <string name="account_undergo_review">這帳號必須通過手動批核才能參與獎賞計劃。\n這可能需時數分鐘至數天不等。</string>
-    <string name="twitter_verification">Twitter 認證</string>
-    <string name="twitter_verify">使用 Twitter 認證</string>
-    <string name="skip_queue_verification">跳過等待</string>
     <string name="enjoy_free_content">在等候的同時請享受免費的內容！</string>
     <string name="verify_phone_number">使用手機號碼認證</string>
     <string name="enter_phone_verify_code">請輸入發送到 %1$s 的認證碼</string>
@@ -387,9 +382,6 @@
     <string name="verify">認證</string>
     <string name="please_enter_valid_phone">請輸入有效的手機號碼。</string>
     <string name="please_enter_verification_code">請輸入發送到你手機號碼的認證碼。</string>
-    <string name="twitter_account_ineligible">你的 Twitter 帳號目前不符合資格：%1$s</string>
-    <string name="twitter_verification_not_approved">你的帳號未能通過獎賞認證。請稍後再試。</string>
-    <string name="twitter_verification_failed">Twitter 認證失敗。請稍後再試。</string>
     <string name="reward_verification_successful">你現在已有資格參與獎賞計劃！</string>
 
     <!-- Forms -->
