@@ -87,6 +87,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +98,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -185,6 +188,7 @@ import io.lbry.lbrysdk.ServiceHelper;
 import io.lbry.lbrysdk.Utils;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity implements SdkStatusListener {
@@ -192,7 +196,9 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     private static final int PLAYBACK_NOTIFICATION_ID = 3;
     private static final String SPECIAL_URL_PREFIX = "lbry://?";
     private static final int REMOTE_NOTIFICATION_REFRESH_TTL = 300000; // 5 minutes
+    public static MainActivity instance;
 
+    private boolean shuttingDown;
     private Date remoteNotifcationsLastLoaded;
     private Map<String, Class> specialRouteFragmentClassMap;
     @Getter
@@ -224,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     @Setter
     private BackPressInterceptor backPressInterceptor;
+    private WebSocketClient webSocketClient;
 
     private NotificationListAdapter notificationListAdapter;
 
@@ -368,6 +375,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        instance = this;
         // workaround to fix dark theme because https://issuetracker.google.com/issues/37124582
         try {
             new WebView(this);
@@ -812,11 +820,17 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         openFragment(PublishFormFragment.class, true, NavMenuItem.ID_ITEM_NEW_PUBLISH, params);
     }
 
-    public void openChannelUrl(String url) {
+    public void openChannelUrl(String url, String source) {
         Map<String, Object> params = new HashMap<>();
         params.put("url", url);
         params.put("claim", getCachedClaimForUrl(url));
+        if (!Helper.isNullOrEmpty(source)) {
+            params.put("source", source);
+        }
         openFragment(ChannelFragment.class, true, NavMenuItem.ID_ITEM_FOLLOWING, params);
+    }
+    public void openChannelUrl(String url) {
+        openChannelUrl(url, null);
     }
 
     private Claim getCachedClaimForUrl(String url) {
@@ -838,21 +852,33 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     }
 
     public void openFileUrl(String url) {
+        openFileUrl(url, null);
+    }
+    public void openFileUrl(String url, String source) {
         Map<String, Object> params = new HashMap<>();
         params.put("url", url);
+        if (!Helper.isNullOrEmpty(source)) {
+            params.put("source", source);
+        }
         openFragment(FileViewFragment.class, true, NavMenuItem.ID_ITEM_FOLLOWING, params);
     }
 
-    private void openSpecialUrl(String url) {
+    private void openSpecialUrl(String url, String source) {
         String specialPath = url.substring(8).toLowerCase();
         if (specialRouteFragmentClassMap.containsKey(specialPath)) {
             Class fragmentClass = specialRouteFragmentClassMap.get(specialPath);
             if (fragmentClassNavIdMap.containsKey(fragmentClass)) {
+                Map<String, Object> params = null;
+                if (!Helper.isNullOrEmpty(source)) {
+                    params = new HashMap<>();
+                    params.put("source",  source);
+                }
+
                 openFragment(
                         specialRouteFragmentClassMap.get(specialPath),
                         true,
                         fragmentClassNavIdMap.get(fragmentClass),
-                        null
+                        params
                 );
             }
         }
@@ -951,10 +977,14 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     @Override
     protected void onDestroy() {
+        shuttingDown = true;
         unregisterReceivers();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         if (receivedStopService || !isServiceRunning(this, LbrynetService.class)) {
             notificationManager.cancelAll();
+        }
+        if (webSocketClient != null) {
+            webSocketClient.close();
         }
         if (dbHelper != null) {
             dbHelper.close();
@@ -1021,21 +1051,53 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+
+
+    @SneakyThrows
+    private void checkWebSocketClient() {
+        if ((webSocketClient == null || webSocketClient.isClosed()) && !Helper.isNullOrEmpty(Lbryio.AUTH_TOKEN)) {
+            webSocketClient = new WebSocketClient(new URI(String.format("%s%s", Lbryio.WS_CONNECTION_BASE_URL, Lbryio.AUTH_TOKEN))) {
+                @Override
+                public void onOpen(ServerHandshake handshakedata) { }
+
+                @Override
+                public void onMessage(String message) {
+                    loadRemoteNotifications(false);
+                }
+
+                @Override
+                public void onClose(int code, String reason, boolean remote) {
+                    if (!shuttingDown) {
+                        // attempt to re-establish the connection if the app isn't being closed
+                        checkWebSocketClient();
+                    }
+                }
+
+                @Override
+                public void onError(Exception ex) { }
+            };
+            webSocketClient.connect();
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        checkWebSocketClient();
         enteringPIPMode = false;
 
         applyNavbarSigninPadding();
         checkFirstRun();
         checkNowPlaying();
 
-        // check (and start) the LBRY SDK service
-        serviceRunning = isServiceRunning(this, LbrynetService.class);
-        if (!serviceRunning) {
-            Lbry.SDK_READY = false;
-            //findViewById(R.id.global_sdk_initializing_status).setVisibility(View.VISIBLE);
-            ServiceHelper.start(this, "", LbrynetService.class, "lbrynetservice");
+        if (isFirstRunCompleted()) {
+            // check (and start) the LBRY SDK service
+            serviceRunning = isServiceRunning(this, LbrynetService.class);
+            if (!serviceRunning) {
+                Lbry.SDK_READY = false;
+                //findViewById(R.id.global_sdk_initializing_status).setVisibility(View.VISIBLE);
+                ServiceHelper.start(this, "", LbrynetService.class, "lbrynetservice");
+            }
         }
         checkSdkReady();
         showSignedInUser();
@@ -1044,6 +1106,11 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         /*if (Lbry.SDK_READY) {
             findViewById(R.id.global_sdk_initializing_status).setVisibility(View.GONE);
         }*/
+    }
+
+    public boolean isFirstRunCompleted() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        return sp.getBoolean(PREFERENCE_KEY_INTERNAL_FIRST_RUN_COMPLETED, false);
     }
 
     private void checkPendingOpens() {
@@ -2159,6 +2226,10 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    public void navigateBackToNotifications() {
+        showNotifications();
+    }
+
     @Override
     public void onBackPressed() {
         if (findViewById(R.id.url_suggestions_container).getVisibility() == View.VISIBLE) {
@@ -2169,6 +2240,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
             hideNotifications();
             return;
         }
+
         if (backPressInterceptor != null && backPressInterceptor.onBackPressed()) {
             return;
         }
@@ -2567,6 +2639,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                 loadRemoteNotifications(false);
 
                 checkUrlIntent(getIntent());
+                checkWebSocketClient();
                 LbryAnalytics.logEvent(LbryAnalytics.EVENT_APP_LAUNCH);
                 appStarted = true;
             }
@@ -3239,14 +3312,14 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
                         String targetUrl = notification.getTargetUrl();
                         if (targetUrl.startsWith(SPECIAL_URL_PREFIX)) {
-                            openSpecialUrl(targetUrl);
+                            openSpecialUrl(targetUrl, "notification");
                         } else {
                             LbryUri target = LbryUri.tryParse(notification.getTargetUrl());
                             if (target != null) {
                                 if (target.isChannel()) {
-                                    openChannelUrl(notification.getTargetUrl());
+                                    openChannelUrl(notification.getTargetUrl(), "notification");
                                 } else {
-                                    openFileUrl(notification.getTargetUrl());
+                                    openFileUrl(notification.getTargetUrl(), "notification");
                                 }
                             }
                         }
