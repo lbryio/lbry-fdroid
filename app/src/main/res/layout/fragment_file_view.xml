@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/file_view_global_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -83,13 +84,11 @@
                     android:paddingStart="6dp"
                     android:paddingEnd="7dp"
                     android:visibility="gone">
-                    <io.lbry.browser.ui.controls.SolidIconView
+                    <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
                         android:layout_gravity="center_vertical"
-                        android:textSize="8dp"
-                        android:text="@string/fa_coins"
-                        android:textColor="@android:color/black" />
+                        android:src="@drawable/ic_credits" />
                     <TextView
                         android:id="@+id/file_view_fee"
                         android:layout_width="wrap_content"
@@ -434,6 +433,36 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/file_view_action_unpublish"
+                        android:clickable="true"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+                        <RelativeLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center_horizontal">
+                            <ImageView
+                                android:tint="@color/foreground"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_centerInParent="true"
+                                android:src="@drawable/ic_unpublish" />
+                        </RelativeLayout>
+                        <TextView
+                            android:fontFamily="@font/inter"
+                            android:textSize="12sp"
+                            android:text="@string/unpublish"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/file_view_action_report"
                         android:clickable="true"
                         android:background="?attr/selectableItemBackground"
@@ -578,52 +607,56 @@
 
                 <LinearLayout
                     android:id="@+id/file_view_description_area"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:visibility="gone">
+
                     <TextView
                         android:id="@+id/file_view_description"
-                        android:textSize="12sp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
                         android:autoLink="all"
+                        android:fontFamily="@font/inter"
                         android:textColorLink="@color/lbryGreen"
                         android:textFontWeight="300"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp" />
+                        android:textSize="12sp" />
+
                     <LinearLayout
                         android:id="@+id/file_view_tag_area"
-                        android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="10"
-                        android:paddingTop="36dp"
                         android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp">
+                        android:layout_marginEnd="16dp"
+                        android:layout_weight="10"
+                        android:orientation="horizontal"
+                        android:paddingTop="36dp">
+
                         <TextView
-                            android:layout_weight="2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="2"
                             android:fontFamily="@font/inter"
                             android:text="@string/tags"
-                            android:textSize="12sp"
-                            android:textFontWeight="600" />
+                            android:textFontWeight="600"
+                            android:textSize="12sp" />
+
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/file_view_tag_list"
-                            android:layout_weight="8"
-                            android:layout_marginStart="8dp"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="8" />
                     </LinearLayout>
 
                     <View
-                        android:background="@color/divider"
                         android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp"
-                        android:layout_height="0.5dp" />
+                        android:background="@color/divider" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -751,4 +784,5 @@
         android:visibility="gone">
 
     </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
