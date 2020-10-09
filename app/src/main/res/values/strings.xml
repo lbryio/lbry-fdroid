@@ -117,6 +117,8 @@
     <string name="content">Content</string>
     <string name="website">Website</string>
     <string name="reposted">reposted</string>
+    <string name="receive_all_notifications">You will receive all notifications</string>
+    <string name="receive_no_notifications">You will not receive notifications for this channel</string>
     <plurals name="follower_count">
         <item quantity="one">%1$s follower</item>
         <item quantity="other">%1$s followers</item>
@@ -382,6 +384,7 @@
     <string name="channel_to_show_support_as">Channel to show support as</string>
     <string name="make_this_a_tip">Make this a tip</string>
     <string name="send_revocable_support">Send Revocable Support</string>
+    <string name="send_lbc_tip">Tip %1$s</string>
     <plurals name="send_lbc_tip">
         <item quantity="one">Tip %1$s Credit</item>
         <item quantity="other">Tip %1$s Credits</item>
@@ -616,6 +619,10 @@
 
     <!-- Notifications -->
     <string name="no_notifications">It\'s quiet here! New notifications will be displayed when you receive them.</string>
+    <plurals name="confirm_delete_notifications">
+        <item quantity="one">Are you sure you want to remove the selected notification?</item>
+        <item quantity="other">Are you sure you want to remove the selected notifications?</item>
+    </plurals>
 
     <!-- Font Awesome -->
     <string name="fa_gift" translatable="false">&#xf06b;</string>
@@ -645,4 +652,7 @@
     <string name="fa_comment_alt" translatable="false">&#xf27a;</string>
     <string name="fa_broadcast_tower" translatable="false">&#xf519;</string>
     <string name="fa_random" translatable="false">&#xf074;</string>
+
+    <string name="fa_bell" translatable="false">&#xf0f3;</string>
+    <string name="fa_bell_slash" translatable="false">&#xf1f6;</string>
 </resources>
