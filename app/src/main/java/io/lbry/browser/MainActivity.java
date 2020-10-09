@@ -238,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static boolean startingPermissionRequest = false;
     public static boolean startingSignInFlowActivity = false;
 
+    private ActionMode actionMode;
     @Getter
     private boolean enteringPIPMode = false;
     private boolean fullSyncInProgress = false;
