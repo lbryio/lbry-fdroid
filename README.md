@@ -11,8 +11,8 @@ An Android browser and wallet for the [LBRY](https://lbry.com) network.
 ## Installation
 The minimum supported Android version is 5.0 Lollipop. There are two ways to install:
 
-1. Via the Google Play Store. Anyone can join the [open beta](https://play.google.com/apps/testing/io.lbry.browser) in order to install the app from the Play Store.
-1. Direct APK install available at [http://build.lbry.io/android/latest.apk](http://build.lbry.io/android/latest.apk). You will need to enable installation from third-party sources on your device in order to install from this source.
+1. Via the F-Droid Android app. Search for LBRY and install the version you prefer.
+1. Download the LBRY file from [the F-Droid website](https://f-droid.org). Search for LBRY on F-Droid's website, it should be listed as LBRY FDroid, download the APK file and install it on your device.
 
 ## Usage
 The app can be launched by opening **LBRY** from the device's app drawer or via the shortcut on the home screen if that was created upon installation.
