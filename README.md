@@ -1,12 +1,10 @@
-# LBRY Android
+# LBRY F-Droid
 [![pipeline status](https://ci.lbry.tech/lbry/lbry-android/badges/master/pipeline.svg)](https://ci.lbry.tech/lbry/lbry-android/commits/master)
 [![GitHub license](https://img.shields.io/github/license/lbryio/lbry-android)](https://github.com/lbryio/lbry-android/blob/master/LICENSE)
 
 An Android browser and wallet for the [LBRY](https://lbry.com) network.
 
-
-<img src="https://spee.ch/@lbry:3f/android-08-homepage.gif" alt="LBRY Android GIF" width="384px" />
-
+<a href="https://f-droid.org/packages/io.lbry.browser"><img src="https://raw.githubusercontent.com/f-droid/artwork/master/badge/get-it-on-en-us.png" title="Get LBRY on F-droid"></a>
 
 ## Installation
 The minimum supported Android version is 5.0 Lollipop. There are two ways to install:
