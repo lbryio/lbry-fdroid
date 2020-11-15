@@ -6,6 +6,8 @@ An Android browser and wallet for the [LBRY](https://lbry.com) network.
 
 <a href="https://f-droid.org/packages/io.lbry.browser"><img src="https://raw.githubusercontent.com/f-droid/artwork/master/badge/get-it-on-en-us.png" title="Get LBRY on F-droid"></a>
 
+<img src="https://spee.ch/@lbry:3f/android-08-homepage.gif" alt="LBRY Android GIF" width="384px" />
+
 ## Installation
 The minimum supported Android version is 5.0 Lollipop. There are two ways to install:
 
