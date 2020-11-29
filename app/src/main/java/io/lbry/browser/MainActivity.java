@@ -1761,7 +1761,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         }).start();
 
         //findViewById(R.id.global_sdk_initializing_status).setVisibility(View.GONE);
-        checkAndEnableShareUsageData();
+        //checkAndEnableShareUsageData();
 
         scheduleWalletBalanceUpdate();
         scheduleWalletSyncTask();
