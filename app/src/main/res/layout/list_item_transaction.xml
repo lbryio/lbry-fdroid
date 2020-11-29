@@ -26,7 +26,7 @@
             />
         <TextView
             android:id="@+id/transaction_amount"
-            android:gravity="right"
+            android:gravity="end"
             android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -34,7 +34,9 @@
             android:fontFamily="@font/inter"
             android:singleLine="true"
             android:textSize="14sp"
-            android:textFontWeight="300" />
+            android:textFontWeight="300"
+            android:textAlignment="viewEnd"
+            android:textDirection="ltr"/>
     </LinearLayout>
 
     <LinearLayout
@@ -60,7 +62,7 @@
             />
         <TextView
             android:id="@+id/transaction_fee"
-            android:gravity="right"
+            android:gravity="end"
             android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -90,10 +92,11 @@
             android:textColor="@color/lbryGreen"
             android:textSize="12sp"
             android:textFontWeight="300"
+            android:textAlignment="viewStart"
             />
         <TextView
             android:id="@+id/transaction_date"
-            android:gravity="right"
+            android:gravity="end"
             android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -106,7 +109,7 @@
             android:visibility="gone" />
         <TextView
             android:id="@+id/transaction_pending_text"
-            android:gravity="right"
+            android:gravity="end"
             android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
