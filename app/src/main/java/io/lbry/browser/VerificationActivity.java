@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.Arrays;
 
 import io.lbry.browser.adapter.VerificationPagerAdapter;
+import io.lbry.browser.listener.SdkStatusListener;
 import io.lbry.browser.listener.SignInListener;
 import io.lbry.browser.listener.WalletSyncListener;
 import io.lbry.browser.model.lbryinc.RewardVerified;
@@ -35,6 +36,7 @@ public class VerificationActivity extends FragmentActivity implements SignInList
     public static final int VERIFICATION_FLOW_REWARDS = 2;
     public static final int VERIFICATION_FLOW_WALLET = 3;
 
+    private List<SdkStatusListener> sdkStatusListeners;
     private BroadcastReceiver sdkReceiver;
     private String email;
     private boolean signedIn;
@@ -43,6 +45,8 @@ public class VerificationActivity extends FragmentActivity implements SignInList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sdkStatusListeners = new ArrayList<>();
 
         signedIn = Lbryio.isSignedIn();
         Intent intent = getIntent();
@@ -65,11 +69,18 @@ public class VerificationActivity extends FragmentActivity implements SignInList
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(LbrynetService.ACTION_STOP_SERVICE);
+        filter.addAction(MainActivity.ACTION_SDK_READY);
         sdkReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (LbrynetService.ACTION_STOP_SERVICE.equals(action)) {
+                if (MainActivity.ACTION_SDK_READY.equals(action)) {
+                    for (SdkStatusListener listener : sdkStatusListeners) {
+                        if (listener != null) {
+                            listener.onSdkReady();
+                        }
+                    }
+                } else if (LbrynetService.ACTION_STOP_SERVICE.equals(action)) {
                     finish();
                 }
             }
@@ -328,5 +339,15 @@ public class VerificationActivity extends FragmentActivity implements SignInList
     public void onDestroy() {
         Helper.unregisterReceiver(sdkReceiver, this);
         super.onDestroy();
+    }
+
+    public void addSdkStatusListener(SdkStatusListener listener) {
+        if (!sdkStatusListeners.contains(listener)) {
+            sdkStatusListeners.add(listener);
+        }
+    }
+
+    public void removeSdkStatusListener(SdkStatusListener listener) {
+        sdkStatusListeners.remove(listener);
     }
 }
