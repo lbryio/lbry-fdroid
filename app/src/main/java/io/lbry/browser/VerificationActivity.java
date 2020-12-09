@@ -15,7 +15,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import io.lbry.browser.adapter.VerificationPagerAdapter;
 import io.lbry.browser.listener.SdkStatusListener;
