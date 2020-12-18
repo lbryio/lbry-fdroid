@@ -58,6 +58,10 @@ configurations {
     all {
         exclude module: 'httpclient'
         exclude module: 'commons-logging'
+        all*.exclude group:'com.google.android.gms', module:'play-services-flags'
+        all*.exclude group:'com.google.android.gms', module:'play-services-base'
+        all*.exclude group:'com.google.android.gms', module:'play-services-tasks'
+        all*.exclude group:'com.google.android.gms', module:'play-services-basement'
     }
 }
 
