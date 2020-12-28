@@ -78,24 +78,6 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/player_toggle_cast"
-        android:clickable="true"
-        android:background="?attr/selectableItemBackground"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone">
-        <ImageView
-            android:id="@+id/player_image_cast_toggle"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_cast"
-            app:tint="@color/white" />
-    </RelativeLayout>
-
-    <RelativeLayout
         android:id="@+id/player_playback_speed"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"

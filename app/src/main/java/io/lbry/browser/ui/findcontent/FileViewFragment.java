@@ -169,7 +169,6 @@ public class FileViewFragment extends BaseFragment implements
     private static final String DEFAULT_PLAYBACK_SPEED = "1x";
     public static final String CDN_PREFIX = "https://cdn.lbryplayer.xyz";
 
-    private PlayerControlView castControlView;
     private Player currentPlayer;
     private boolean loadingNewClaim;
     private boolean startDownloadPending;
@@ -1127,13 +1126,6 @@ public class FileViewFragment extends BaseFragment implements
             }
         });
 
-        root.findViewById(R.id.player_toggle_cast).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleCast();
-            }
-        });
-
         PlayerView playerView = root.findViewById(R.id.file_view_exoplayer_view);
         View playbackSpeedContainer = playerView.findViewById(R.id.player_playback_speed);
         TextView textPlaybackSpeed = playerView.findViewById(R.id.player_playback_speed_label);
@@ -1714,16 +1706,6 @@ public class FileViewFragment extends BaseFragment implements
     private void setCurrentPlayer(Player currentPlayer) {
         if (this.currentPlayer == currentPlayer) {
             return;
-        }
-
-        // View management.
-        if (currentPlayer == MainActivity.appPlayer) {
-            //localPlayerView.setVisibility(View.VISIBLE);
-            castControlView.hide();
-            ((ImageView) getView().findViewById(R.id.player_image_cast_toggle)).setImageResource(R.drawable.ic_cast);
-        } else /* currentPlayer == castPlayer */ {
-            castControlView.show();
-            ((ImageView) getView().findViewById(R.id.player_image_cast_toggle)).setImageResource(R.drawable.ic_cast_connected);
         }
 
         // Player state management.
@@ -2665,19 +2647,6 @@ public class FileViewFragment extends BaseFragment implements
         Context context = getContext();
         if (context instanceof MainActivity) {
             ((MainActivity) context).showFloatingWalletBalance();
-        }
-    }
-
-    private void toggleCast() {
-        if (!MainActivity.castPlayer.isCastSessionAvailable()) {
-            showError(getString(R.string.no_cast_session_available));
-            return;
-        }
-
-        if (currentPlayer == MainActivity.appPlayer) {
-            setCurrentPlayer(MainActivity.castPlayer);
-        } else {
-            setCurrentPlayer(MainActivity.appPlayer);
         }
     }
 
