@@ -55,12 +55,10 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.ui.PlayerNotificationManager;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.cache.Cache;
-import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
@@ -237,8 +235,6 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static SimpleExoPlayer appPlayer;
     public static Cache playerCache;
     public static boolean playerReassigned;
-    public CastContext castContext;
-    public static CastPlayer castPlayer;
     public static int nowPlayingSource;
     public static Claim nowPlayingClaim;
     public static String nowPlayingClaimUrl;
