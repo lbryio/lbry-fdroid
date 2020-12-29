@@ -88,8 +88,6 @@
     <string name="please_enter_comment">Please enter a comment to post.</string>
     <string name="please_select_channel">Please select a channel to post your comment as.</string>
     <string name="comment_form_post">Post</string>
-    <string name="comment_confirm_post">Confirm your comment</string>
-    <string name="confirm_post_comment">This will post your comment</string>
     <string name="comment_posted">Your comment was successfully posted.</string>
     <string name="please_select_repost_channel">Please select a channel to repost on.</string>
     <string name="reply">Reply</string>
@@ -103,6 +101,18 @@
         <item quantity="one">This will purchase "%1$s" for %2$s credit</item>
         <item quantity="other">This will purchase "%1$s" for %2$s credits</item>
     </plurals>
+    <plurals name="post_and_tip">
+        <item quantity="one">Post and tip %1$s credit?</item>
+        <item quantity="other">Post and tip %1$s credits?</item>
+    </plurals>
+    <plurals name="post_for_credits">
+        <item quantity="one">Post for %1$s credit</item>
+        <item quantity="other">Post for %1$s credits</item>
+    </plurals>
+    <plurals name="confirm_post_comment">
+        <item quantity="one">This will post your comment with a tip of %1$s credit for %2$s</item>
+        <item quantity="other">This will post your comment with a tip of %1$s credits for %2$s</item>
+    </plurals>
 
     <!-- Channel view -->
     <string name="no_channel_info">There\'s nothing here yet.\nPlease check back later.</string>
@@ -111,6 +121,8 @@
     <string name="reposted">reposted</string>
     <string name="receive_all_notifications">You will receive all notifications</string>
     <string name="receive_no_notifications">You will not receive notifications for this channel</string>
+    <string name="confirm_unfollow">Stop following channel?</string>
+    <string name="confirm_unfollow_message">Are you sure you want to stop following this channel?</string>
     <plurals name="follower_count">
         <item quantity="one">%1$s follower</item>
         <item quantity="other">%1$s followers</item>

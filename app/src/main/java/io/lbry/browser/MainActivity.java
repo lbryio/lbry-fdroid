@@ -40,6 +40,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -2661,6 +2662,23 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         StartupStageAdapter adapter = new StartupStageAdapter(this, startupStages);
         listView.setAdapter(adapter);
 
+        // Add 1 pixel to listview height
+        int listHeight = Math.round(getResources().getDisplayMetrics().density);
+
+        for (int i = 0; i < startupStages.size(); i++) {
+            View item = adapter.getView(i, null, listView);
+            item.measure(0, 0);
+            listHeight += item.getMeasuredHeight();
+        }
+
+        // Properly set listview height by adding all seven items and the divider heights
+        // and the additional 1 pixel so no vertical scroll bar is shown
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = listHeight + (listView.getCount() + 1) * listView.getDividerHeight();
+        listView.setLayoutParams(params);
+        listView.invalidate();
+        listView.requestLayout();
+
         findViewById(R.id.splash_view_loading_container).setVisibility(View.GONE);
         findViewById(R.id.splash_view_error_container).setVisibility(View.VISIBLE);
     }
@@ -3007,6 +3025,17 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                 String action = intent.getAction();
                 if (LbrynetService.ACTION_STOP_SERVICE.equals(action)) {
                     MainActivity.this.receivedStopService = true;
+
+                    // STOP is meant to close everything,
+                    // So destroy the player at this point (even with background play enabled)
+                    if (appPlayer != null) {
+                        playerNotificationManager.setPlayer(null);
+                        stopExoplayer();
+                        nowPlayingClaim = null;
+                        nowPlayingClaimUrl = null;
+                        nowPlayingClaimBitmap = null;
+                    }
+
                     MainActivity.this.finish();
                 } else if (LbrynetService.LBRY_SDK_SERVICE_STARTED.equals(action)) {
                     // Rebuild the service notification

@@ -159,10 +159,11 @@
             <ListView
                 android:id="@+id/startup_stage_error_listview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginTop="12dp"
                 android:divider="@android:color/transparent"
                 android:dividerHeight="8dp"
+                android:scrollbars="none"
                 tools:listitem="@layout/list_item_startupstage">
 
             </ListView>
