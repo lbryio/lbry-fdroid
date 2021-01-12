@@ -12,9 +12,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.util.Base64;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -92,8 +94,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.lbry.browser.MainActivity;
 import io.lbry.browser.R;
@@ -310,8 +310,7 @@ public class FileViewFragment extends BaseFragment implements
                         String mediaSourceUrl = getStreamingUrl();
                         long duration = MainActivity.appPlayer.getDuration();
                         long position = MainActivity.appPlayer.getCurrentPosition();
-                        // TODO: Determine a hash for the userId
-                        String userIdHash = Helper.SHA256(Lbryio.currentUser != null ? String.valueOf(Lbryio.currentUser.getId()) : "0");
+                        String userIdHash = Lbryio.currentUser != null ? String.valueOf(Lbryio.currentUser.getId()) : "0";
                         if (mediaSourceUrl.startsWith(CDN_PREFIX)) {
                             BufferEventTask bufferEvent = new BufferEventTask(claim.getPermanentUrl(), duration, position, 1, userIdHash);
                             bufferEvent.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -429,8 +428,11 @@ public class FileViewFragment extends BaseFragment implements
                             renderNothingAtLocation();
                         } else if (claim.getName().startsWith("@")) {
                             // this is a reposted channel, so launch the channel url
-                            if (context instanceof  MainActivity) {
-                                ((MainActivity) context).openChannelUrl(!Helper.isNullOrEmpty(claim.getShortUrl()) ? claim.getShortUrl() : claim.getPermanentUrl());
+                            if (context instanceof MainActivity) {
+                                MainActivity activity = (MainActivity) context;
+                                //activity.onBackPressed(); // remove the reposted url page from the back stack
+                                activity.getSupportFragmentManager().popBackStack();
+                                activity.openChannelUrl(!Helper.isNullOrEmpty(claim.getShortUrl()) ? claim.getShortUrl() : claim.getPermanentUrl());
                             }
                             return;
                         }
@@ -899,7 +901,9 @@ public class FileViewFragment extends BaseFragment implements
                             // this is a reposted channel, so finish this activity and launch the channel url
                             Context context = getContext();
                             if (context instanceof  MainActivity) {
-                                ((MainActivity) context).openChannelUrl(!Helper.isNullOrEmpty(claim.getShortUrl()) ? claim.getShortUrl() : claim.getPermanentUrl());
+                                MainActivity activity = (MainActivity) context;
+                                activity.getSupportFragmentManager().popBackStack();
+                                activity.openChannelUrl(!Helper.isNullOrEmpty(claim.getShortUrl()) ? claim.getShortUrl() : claim.getPermanentUrl());
                             }
                             return;
                         }
@@ -1668,6 +1672,8 @@ public class FileViewFragment extends BaseFragment implements
                     .build();
 
             MainActivity.appPlayer = new SimpleExoPlayer.Builder(context).build();
+            MainActivity.appPlayer.setWakeMode(C.WAKE_MODE_NETWORK);
+
             MainActivity.appPlayer.setAudioAttributes(audioAttributes, true);
             MainActivity.playerCache =
                     new SimpleCache(context.getCacheDir(),
@@ -2122,19 +2128,9 @@ public class FileViewFragment extends BaseFragment implements
         ReadTextFileTask task = new ReadTextFileTask(filePath, new ReadTextFileTask.ReadTextFileHandler() {
             @Override
             public void onSuccess(String text) {
-                String html = buildMarkdownHtml(text);
-
                 if (webView != null) {
-                    // Due to a change to Chrome, WebView only displays '#' -and everything after it-
-                    // if it is '%23' instead. Problem appears in text like '#2' or #hashtags.
-                    Pattern pattern = Pattern.compile("#(\\S+)");
-                    Matcher matcher = pattern.matcher(html);
-
-                    if (matcher.find()) {
-                        html = html.replaceAll(pattern.toString(), "&%2335;" + matcher.group(1));
-                    }
-
-                    webView.loadData(html, "text/html", "utf-8");
+                    String html = buildMarkdownHtml(text);
+                    webView.loadData(Base64.encodeToString(html.getBytes(), Base64.NO_PADDING), "text/html", "base64");
                 }
             }
 
