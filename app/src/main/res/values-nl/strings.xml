@@ -406,7 +406,16 @@
     <string name="not_interested">Niet geïnteresseerd</string>
     <string name="manual_reward_verification">Handmatige Beloningsverificatie</string>
     <string name="reward_verification">Beloningsverificatie</string>
+    <string name="social_media_verification">Sociale Media Verificatie</string>
+    <string name="skip_the_queue">Sla de Wachtrij over</string>
+    <string name="skip_queue_button_text">Sla over voor $%1$s</string>
     <string name="account_undergo_review">Dit account moet worden beoordeeld voordat u kunt deelnemen aan het beloningsprogramma. Dit kan enkele minuten tot meerdere dagen duren.</string>
+    <string name="get_instantly_verified">U kunt onmiddellijk worden geverifieerd om te kunnen deelnemen aan het beloningsprogramma met uw Twitter-account of door de wachtrij voor handmatige verificatie over te slaan.</string>
+    <string name="twitter_verification">Twitter-verificatie</string>
+    <string name="twitter_verification_desc">Word onmiddellijk geverifieerd met uw Twitter-account. Uw Twitter e-mailadres moet overeenkomen met het e-mailadres dat u hebt opgegeven en uw account moet actief zijn.</string>
+    <string name="twitter_verify">Verifieer met Twitter</string>
+    <string name="skip_queue_verification">Sla de Wachtrij over</string>
+    <string name="skip_queue_verification_desc">Sla de wachtrij voor handmatige verificatie over door een vergoeding te betalen, zodat u direct kunt deelnemen aan het beloningsprogramma.</string>
     <string name="request_to_be_verified">Verzoek om te worden geverifieerd in de &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY Discord server&lt;/a&gt;. Een handmatige beoordeling kan enkele minuten tot enkele dagen duren.</string>
     <string name="enjoy_free_content">Geniet ondertussen van gratis inhoud!</string>
     <string name="verify_phone_number">Verifieer Telefoonnummer</string>
@@ -418,6 +427,9 @@
     <string name="fetch_current_user_error">Gebruikersaccount kan op dit moment niet worden opgehaald. Probeer het later opnieuw.</string>
     <string name="purchase_request_pending">Uw aankoopverzoek wordt nog verwerkt. Stuur een e-mail naar support@lbry.com.</string>
     <string name="purchase_request_failed_error">Uw aankoopverzoek kan op dit moment niet worden voltooid. Stuur een e-mail naar support@lbry.com.</string>
+    <string name="twitter_account_ineligible">Uw Twitter-account komt op dit moment niet in aanmerking: %1$s</string>
+    <string name="twitter_verification_not_approved">Uw account is niet goedgekeurd voor het beloningsprogramma. Probeer het later opnieuw.</string>
+    <string name="twitter_verification_failed">Twitter-verificatie mislukt. Probeer het later opnieuw.</string>
     <string name="reward_verification_successful">U komt nu in aanmerking om deel te nemen aan het beloningsprogramma!</string>
 
     <!-- Forms -->

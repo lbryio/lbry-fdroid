@@ -428,7 +428,16 @@
     <string name="not_interested">Не зацікавлений</string>
     <string name="manual_reward_verification">Ручна Верифікація Винагород </string>
     <string name="reward_verification">Підтвердження винагород </string>
+    <string name="social_media_verification">Підтвердження за допомогою соціальних мереж</string>
+    <string name="skip_the_queue">Пропустити Чергу</string>
+    <string name="skip_queue_button_text">Попустити за $%1$s</string>
     <string name="account_undergo_review">Цей акаунт має пройти перевірку перед прийняттям участі у програмі винагород. Це може зайняти від декількох хвилин до декількох днів.</string>
+    <string name="get_instantly_verified">Ви можете бути підтверджені миттєво для участі у програмі винагород за допомогою акаунту Twitter або пропустіть чергу ручного підтвердження. </string>
+    <string name="twitter_verification">Підтвердження за допомогою Twitter</string>
+    <string name="twitter_verification_desc">Отримайте миттєве підтвердження, використавши акаунт Twitter. Ваша пошта Twitter має збігатися з поштою, яку Ви надали, а ваш акаунт має бути активним.  </string>
+    <string name="twitter_verify">Підтвердіть за допомогою Twitter </string>
+    <string name="skip_queue_verification">Пропустити Чергу</string>
+    <string name="skip_queue_verification_desc">Пропустіть ручну верифікацію сплативши внесок для миттєвого початку участі у програмі винагород. </string>
     <string name="request_to_be_verified">Будь ласка, зробіть запит верифікації у &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY Discord server&lt;/a&gt;. Ручне підтвердження може зайняти скільки-завгодно від декількох хвилин до декількох днів. </string>
     <string name="enjoy_free_content">А поки що насолоджуйтесь безкоштовним контентом! </string>
     <string name="verify_phone_number">Підтвердіть номер телефону </string>
@@ -440,6 +449,9 @@
     <string name="fetch_current_user_error">Акаунт не може бути відновлений зараз. Будь ласка, спробуйте ще раз пізніше.</string>
     <string name="purchase_request_pending">Ваша запит на придбання оброблюється. Будь ласка, пишіть на support@lbry.com.</string>
     <string name="purchase_request_failed_error">Ваш запит придбання не може бути оброблений зараз. Будь ласка, пишіть на support@lbry.com.</string>
+    <string name="twitter_account_ineligible">Ваш акаунт Twitter недоступний зараз: %1$s</string>
+    <string name="twitter_verification_not_approved">Ваш акаунт не був підтверджений для участі у програмі винагород. Будь ласка, спробуйте ще раз пізніше. </string>
+    <string name="twitter_verification_failed">Верифікація у Twitter не вдалася. Будь ласка, спробуйте ще раз пізніше.</string>
     <string name="reward_verification_successful">Тепер Ви можете прийняти участь у програмі нагород! </string>
 
     <!-- Forms -->

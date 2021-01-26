@@ -432,7 +432,16 @@
     <string name="not_interested">No m\'interessa</string>
     <string name="manual_reward_verification">Verificació de recompenses manual</string>
     <string name="reward_verification">Verificació de recompenses</string>
+    <string name="social_media_verification">Verificació de xarxes socials</string>
+    <string name="skip_the_queue">Salta\'t la cua</string>
+    <string name="skip_queue_button_text">Salta-te-la per %1$s$</string>
     <string name="account_undergo_review">Aquest compte ha de passar per una revissió abans que puguis participar en el programa de recompenses. Això pot trigar des d\'uns minuts fins a alguns dies.</string>
+    <string name="get_instantly_verified">Et pots verificar instantàniament per poder participar en el programa de recompenses emprant el teu compte de Twitter, o saltant-te la cua de la verificació manual.</string>
+    <string name="twitter_verification">Verificació mitjançant Twitter</string>
+    <string name="twitter_verification_desc">Pots verificar-te instantàniament emprant el teu compte de Twitter. La teva direcció de correu electrònic amb Twitter ha de coincidir amb la direcció que has proveït, i el teu compte ha d\'estar actiu.</string>
+    <string name="twitter_verify">Verifica mitjançant Twitter</string>
+    <string name="skip_queue_verification">Salta\'t la cua</string>
+    <string name="skip_queue_verification_desc">Salta\'t la verificació manual pagant una quota per tal de participar en el programa de recompenses immediatament.</string>
     <string name="request_to_be_verified">Sisplau, demana que et verifiquin al &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;servidor de Discord de LBRY&lt;/a&gt;. Una verificació manual pot trigar des d\'alguns minuts fins a diversos dies.</string>
     <string name="enjoy_free_content">Gaudeix del contingut gratis mentrestant!</string>
     <string name="verify_phone_number">Verifica el número de telèfon</string>
@@ -444,6 +453,9 @@
     <string name="fetch_current_user_error">El compte d\'usuari no s\'ha pogut recuperar. Sisplau, torna a internar-ho més tard.</string>
     <string name="purchase_request_pending">La teva petició de compra encara s\'està processant. Sisplau, envia\'ns un correu a support@lbry.com.</string>
     <string name="purchase_request_failed_error">La teva petició de compra no s\'ha pogut completar en aquest moment. Sisplau, envia\'ns un correu a support@lbry.com</string>
+    <string name="twitter_account_ineligible">El teu compte de Twitter no és elegible en aquest moment: %1$s</string>
+    <string name="twitter_verification_not_approved">El teu compte no ha estat aprovat pel programa de recompenses. Sisplau, torna a provar-ho més tard.</string>
+    <string name="twitter_verification_failed">La verificació mitjançant Twitter ha fallat. Sisplau, torna a intentar-ho més tard.</string>
     <string name="reward_verification_successful">Ets elegible per participar en el programa de recompenses!</string>
 
     <!-- Forms -->

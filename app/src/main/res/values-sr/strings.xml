@@ -444,7 +444,16 @@
     <string name="not_interested">Nisam zainteresovan</string>
     <string name="manual_reward_verification">Ručna Verifikacija za Nagrade</string>
     <string name="reward_verification">Verifikacija Nagrada</string>
+    <string name="social_media_verification">Verifikacija Društvenih Mreža</string>
+    <string name="skip_the_queue">Preskoči Redosled</string>
+    <string name="skip_queue_button_text">Preskoči za %1$s$</string>
     <string name="account_undergo_review">Vaš nalog mora proći proveru pre nego što budete odobreni za nagradni program. Ovaj proces može trajati od nekoliko minuta do nekoliko dana.</string>
+    <string name="get_instantly_verified">Možete se odmah verifikovati čime stičete pravo učestovanja u Nagradnom programu putem vašeg Twitter naloga i time preskočiti red manualne verifikacije.</string>
+    <string name="twitter_verification">Twitter Verifikacija</string>
+    <string name="twitter_verification_desc">Verifikujte se odmah putem vašeg Twitter naloga. Vaša Twitter email adresa mora biti ista kao email adresa koju ste prethodno naveli, i vaš nalog bi potom trebao biti aktivan.</string>
+    <string name="twitter_verify">Verifikujte se putem Twitter-a</string>
+    <string name="skip_queue_verification">Preskoči Redosled</string>
+    <string name="skip_queue_verification_desc">Preskočite red za manuelnu verifikaciju plaćanjem provizije i time odmah steknite pravo za učestvovanje u Nagradnom programu.</string>
     <string name="request_to_be_verified">Molimo vas da zatražite manuelnu verifikaciju na &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY Discord server&lt;/a&gt;. Obrada manuelnog zahteva može trajati od nekoliko minuta do nekoliko dana.</string>
     <string name="enjoy_free_content">Uživajte u besplatnim sadržajima u međjuvremenu!</string>
     <string name="verify_phone_number">Potvrdite Broj Telefona</string>
@@ -456,6 +465,9 @@
     <string name="fetch_current_user_error">Korisnički nalog ne može biti učitan u ovom trenutku. Molimo pokušajte kasnije.</string>
     <string name="purchase_request_pending">Vaš zahtev za kupovinu je i dalje u obradi. Molimo vas pošaljite email na support@lbry.com.</string>
     <string name="purchase_request_failed_error">Vaš zahtev za kupovinu trenutno ne može biti obradjen. Molimo vas pošaljite email na support@lbry.com.</string>
+    <string name="twitter_account_ineligible">Vaš Twitter nalog trenutno nije podoban: %1$s</string>
+    <string name="twitter_verification_not_approved">Vaš nalog nije odobren za Nagradni program. Molimo pokušajte kasnije.</string>
+    <string name="twitter_verification_failed">Twitter verifikacija neuspešna. Molimo pokušajte kasnije.</string>
     <string name="reward_verification_successful">Sada ste podobni da učestvujete u Nagradnom programu!</string>
 
     <!-- Forms -->

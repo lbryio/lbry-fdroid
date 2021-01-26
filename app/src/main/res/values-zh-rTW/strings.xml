@@ -431,7 +431,6 @@
     <string name="skip_queue_verification">跳過輪候</string>
     <string name="skip_queue_verification_desc">付出手續費跳過手動認證的輪候隊伍以立即參與獎賞計畫。</string>
     <string name="request_to_be_verified">請在&lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY 的 Discord伺服器&lt;/a&gt;.提出認證申請。手動批核需時數分鐘到數天不等。</string>
->>>>>>> 6fa308ef96dc4881600add2f4bd2575d9b5efee8
     <string name="enjoy_free_content">在等候的同時請享受免費的內容！</string>
     <string name="verify_phone_number">使用手機號碼認證</string>
     <string name="enter_phone_verify_code">請輸入發送到 %1$s 的認證碼</string>
@@ -446,7 +445,6 @@
     <string name="twitter_verification_not_approved">你的帳號未能通過獎賞認證計畫。請稍後再試。</string>
     <string name="twitter_verification_failed">Twitter 認證失敗。請稍後再試。</string>
     <string name="reward_verification_successful">你現在已有資格參與獎賞計畫！</string>
->>>>>>> 6fa308ef96dc4881600add2f4bd2575d9b5efee8
 
     <!-- Forms -->
     <string name="no_added_tags">你目前沒有跟隨任何標籤。新增標籤以改善發掘功能。</string>

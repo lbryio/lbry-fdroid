@@ -432,7 +432,16 @@
     <string name="not_interested">Pas intéressé</string>
     <string name="manual_reward_verification">Vérification manuelle des récompenses</string>
     <string name="reward_verification">Vérification des récompenses</string>
+    <string name="social_media_verification">Vérification des réseaux sociaux</string>
+    <string name="skip_the_queue">Passer la file d\'attente</string>
+    <string name="skip_queue_button_text">Passer pour $%1$s</string>
     <string name="account_undergo_review">Ce compte doit être examiné avant de pouvoir participer au programme de récompenses. Cela peut prendre de quelques minutes à plusieurs jours.</string>
+    <string name="get_instantly_verified">Vous pouvez être instantanément vérifié pour pouvoir participer au programme de récompenses en utilisant votre compte Twitter ou en sautant la file d\'attente de vérification manuelle.</string>
+    <string name="twitter_verification">Vérification Twitter</string>
+    <string name="twitter_verification_desc">Soyez instantanément vérifié en utilisant votre compte Twitter. Votre adresse e-mail Twitter doit correspondre à l\'e-mail que vous avez fourni et votre compte doit être actif.</string>
+    <string name="twitter_verify">Vérifier avec Twitter</string>
+    <string name="skip_queue_verification">Passer la file d\'attente</string>
+    <string name="skip_queue_verification_desc">Évitez la file d\'attente de vérification manuelle en payant des frais afin de commencer immédiatement à participer au programme de récompenses.</string>
     <string name="request_to_be_verified">Veuillez demander à être vérifié sur le &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY Discord server&lt;Une révision manuelle peut durer de quelques minutes à plusieurs jours./a&gt;. </string>
     <string name="enjoy_free_content">Veuillez profiter du contenu gratuit en attendant!</string>
     <string name="verify_phone_number">Vérifier le numéro de téléphone</string>
@@ -444,6 +453,9 @@
     <string name="fetch_current_user_error">Le compte utilisateur n\'a pas pu être récupéré pour le moment. Veuillez réessayer plus tard.</string>
     <string name="purchase_request_pending">Votre demande d\'achat est toujours en cours de traitement. Veuillez envoyer un e-mail à support@lbry.com.</string>
     <string name="purchase_request_failed_error">Votre demande d\'achat n\'a pas pu être traitée pour le moment. Veuillez envoyer un e-mail à support@lbry.com.</string>
+    <string name="twitter_account_ineligible">Votre compte Twitter n\'est pas éligible pour le moment:%1$s</string>
+    <string name="twitter_verification_not_approved">Votre compte n\'a pas été approuvé pour le programme de récompenses. Veuillez réessayer plus tard.</string>
+    <string name="twitter_verification_failed">La vérification Twitter a échoué. Veuillez réessayer plus tard.</string>
     <string name="reward_verification_successful">Vous êtes désormais éligible pour participer au programme de récompenses!</string>
 
     <!-- Forms -->

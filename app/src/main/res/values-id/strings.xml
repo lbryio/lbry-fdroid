@@ -420,7 +420,16 @@
     <string name="not_interested">Tidak tertarik</string>
     <string name="manual_reward_verification">Verifikasi Hadiah Manual</string>
     <string name="reward_verification">Verifikasi Hadiah</string>
+    <string name="social_media_verification">Verifikasi Media Sosial</string>
+    <string name="skip_the_queue">Lewati Antrian</string>
+    <string name="skip_queue_button_text">Lewati untuk $%1$s</string>
     <string name="account_undergo_review">Akun ini harus menjalani peninjauan sebelum Anda dapat berpartisipasi dalam program hadiah. Ini bisa memakan waktu mulai dari beberapa menit hingga beberapa hari.</string>
+    <string name="get_instantly_verified">Anda dapat langsung diverifikasi untuk dapat berpartisipasi dalam program hadiah menggunakan akun Twitter Anda atau melewati antrean verifikasi manual.</string>
+    <string name="twitter_verification">Verifikasi Twitter</string>
+    <string name="twitter_verification_desc">Dapatkan verifikasi langsung menggunakan akun Twitter Anda. Alamat email Twitter Anda harus sama dengan email yang Anda berikan dan akun Anda harus aktif.</string>
+    <string name="twitter_verify">Verifikasi dengan Twitter</string>
+    <string name="skip_queue_verification">Lewati Antrian</string>
+    <string name="skip_queue_verification_desc">Lewati antrean verifikasi manual dengan membayar biaya untuk segera mulai berpartisipasi dalam program hadiah.</string>
     <string name="request_to_be_verified">Silakan meminta untuk diverifikasi di &lt;a href=\"https://discordapp.com/invite/Z3bERWA\"&gt;LBRY Discord server&lt;/a&gt;.Peninjauan manual dapat berlangsung dari beberapa menit hingga beberapa hari.</string>
     <string name="enjoy_free_content">Silakan nikmati konten gratis sementara itu!</string>
     <string name="verify_phone_number">Verifikasi Nomor Telepon</string>
@@ -432,6 +441,9 @@
     <string name="fetch_current_user_error">Akun pengguna tidak dapat diambil saat ini. Silakan coba lagi nanti.</string>
     <string name="purchase_request_pending">Permintaan pembelian Anda masih diproses. Silakan kirim email ke support@lbry.com.</string>
     <string name="purchase_request_failed_error">Permintaan pembelian Anda tidak dapat diselesaikan saat ini. Silakan kirim email ke support@lbry.com.</string>
+    <string name="twitter_account_ineligible">Akun Twitter Anda tidak memenuhi syarat untuk saat ini:%1$s</string>
+    <string name="twitter_verification_not_approved">Akun Anda tidak disetujui untuk program hadiah. Silakan coba lagi nanti.</string>
+    <string name="twitter_verification_failed">Verifikasi Twitter gagal. Silakan coba lagi nanti.</string>
     <string name="reward_verification_successful">Sekarang Anda berhak untuk berpartisipasi dalam program hadiah!</string>
 
     <!-- Forms -->
