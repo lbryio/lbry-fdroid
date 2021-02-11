@@ -123,7 +123,7 @@ keystorepass = "fY1Y1tAegMrzZcQTgrs/7tcpOLSa+sg80JnbZnKpAYI="
 keypass = "fY1Y1tAegMrzZcQTgrs/7tcpOLSa+sg80JnbZnKpAYI="
 
 # The distinguished name used for all keys.
-keydname = "CN=localhost, OU=F-Droid"
+keydname = "CN=lbry.com, OU=LBRY Inc. C=US"
 
 # Use this to override the auto-generated key aliases with specific ones
 # for particular applications. Normally, just leave it empty.
