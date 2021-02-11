@@ -4,6 +4,8 @@ License: MIT
 SourceCode: https://github.com/lbryio/lbry-fdroid
 IssueTracker: https://github.com/lbryio/lbry-fdroid/issues
 
+AutoName: LBRY
+
 RepoType: git
 Repo: https://github.com/lbryio/lbry-fdroid
 
@@ -17,3 +19,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
+CurrentVersion: 0.16.15
+CurrentVersionCode: 1615
