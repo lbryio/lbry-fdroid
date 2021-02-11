@@ -1,0 +1,1 @@
+{"repo": {"timestamp": 1613052360000, "version": 21, "name": "LBRY archive repository", "icon": "lbry-icon.png", "address": "https://github.com/lbryio/lbry-fdroid/fdroid/archive", "description": "An Android browser and wallet for the LBRY network. "}, "requests": {"install": [], "uninstall": []}, "apps": [], "packages": {}}
