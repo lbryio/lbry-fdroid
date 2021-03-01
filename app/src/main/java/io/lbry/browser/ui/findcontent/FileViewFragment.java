@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
@@ -98,6 +97,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -209,6 +209,8 @@ public class FileViewFragment extends BaseFragment implements
     private View layoutResolving;
     private int lastPositionSaved;
 
+    private View tipButton;
+
     private WebView webView;
     private boolean webViewAdded;
 
@@ -254,6 +256,8 @@ public class FileViewFragment extends BaseFragment implements
         layoutDisplayArea = root.findViewById(R.id.file_view_claim_display_area);
         buttonPublishSomething = root.findViewById(R.id.nothing_at_location_publish_button);
 
+        tipButton = root.findViewById(R.id.file_view_action_tip);
+
         containerReplyToComment = root.findViewById(R.id.comment_form_reply_to_container);
         textReplyingTo = root.findViewById(R.id.comment_form_replying_to_text);
         textReplyToBody = root.findViewById(R.id.comment_form_reply_to_body);
@@ -283,14 +287,13 @@ public class FileViewFragment extends BaseFragment implements
 
         fileViewPlayerListener = new Player.EventListener() {
             @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            public void onPlaybackStateChanged(@Player.State int playbackState) {
                 if (playbackState == Player.STATE_READY) {
                     elapsedDuration = MainActivity.appPlayer.getCurrentPosition();
                     totalDuration = MainActivity.appPlayer.getDuration() < 0 ? 0 : MainActivity.appPlayer.getDuration();
                     if (!playbackStarted) {
                         logPlay(currentUrl, startTimeMillis);
                         playbackStarted = true;
-                        isPlaying = true;
 
                         long lastPosition = loadLastPlaybackPosition();
                         if (lastPosition > -1) {
@@ -302,7 +305,7 @@ public class FileViewFragment extends BaseFragment implements
                     hideBuffering();
 
                     if (loadingNewClaim) {
-                        MainActivity.appPlayer.setPlayWhenReady(true);
+                        MainActivity.appPlayer.setPlayWhenReady(Objects.requireNonNull((MainActivity) (getActivity())).isMediaAutoplayEnabled());
                         loadingNewClaim = false;
                     }
                 } else if (playbackState == Player.STATE_BUFFERING) {
@@ -338,6 +341,11 @@ public class FileViewFragment extends BaseFragment implements
                 } else {
                     hideBuffering();
                 }
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlayng) {
+                isPlaying = isPlayng;
             }
         };
 
@@ -1485,6 +1493,11 @@ public class FileViewFragment extends BaseFragment implements
         Helper.setViewVisibility(layoutLoadingState, View.GONE);
         Helper.setViewVisibility(layoutNothingAtLocation, View.GONE);
 
+        if (claim.getTags().contains("disable-support") || claim.getSigningChannel().getTags().contains("disable-support"))
+            Helper.setViewVisibility(tipButton, View.GONE);
+        else
+            Helper.setViewVisibility(tipButton, View.VISIBLE);
+
         loadViewCount();
         checkIsFollowing();
         
@@ -1667,9 +1680,20 @@ public class FileViewFragment extends BaseFragment implements
     private void checkAndLoadComments() {
         View root = getView();
         if (root != null) {
+            View commentsDisabledText = root.findViewById(R.id.file_view_disabled_comments);
+            View commentForm = root.findViewById(R.id.container_comment_form);
             RecyclerView commentsList = root.findViewById(R.id.file_view_comments_list);
-            if (commentsList == null || commentsList.getAdapter() == null || commentsList.getAdapter().getItemCount() == 0) {
-                loadComments();
+            if (claim.getTags().contains("disable-comments") || claim.getSigningChannel().getTags().contains("disable-comments")) {
+                Helper.setViewVisibility(commentsDisabledText, View.VISIBLE);
+                Helper.setViewVisibility(commentForm, View.GONE);
+                Helper.setViewVisibility(commentsList, View.GONE);
+            } else {
+                Helper.setViewVisibility(commentsDisabledText, View.GONE);
+                Helper.setViewVisibility(commentForm, View.VISIBLE);
+                Helper.setViewVisibility(commentsList, View.VISIBLE);
+                if (commentsList == null || commentsList.getAdapter() == null || commentsList.getAdapter().getItemCount() == 0) {
+                    loadComments();
+                }
             }
         }
     }
@@ -1754,7 +1778,7 @@ public class FileViewFragment extends BaseFragment implements
                     ((MainActivity) context).setNowPlayingClaim(claim, currentUrl);
                 }
 
-                MainActivity.appPlayer.setPlayWhenReady(true);
+                MainActivity.appPlayer.setPlayWhenReady(Objects.requireNonNull((MainActivity) (getActivity())).isMediaAutoplayEnabled());
                 String userAgent = Util.getUserAgent(context, getString(R.string.app_name));
                 String mediaSourceUrl = getStreamingUrl();
                 MediaSource mediaSource = new ProgressiveMediaSource.Factory(
@@ -1762,7 +1786,8 @@ public class FileViewFragment extends BaseFragment implements
                         new DefaultExtractorsFactory()
                 ).setLoadErrorHandlingPolicy(new StreamLoadErrorPolicy()).createMediaSource(Uri.parse(mediaSourceUrl));
 
-                MainActivity.appPlayer.prepare(mediaSource, true, true);
+                MainActivity.appPlayer.setMediaSource(mediaSource, true);
+                MainActivity.appPlayer.prepare();
             }
         }
     }
