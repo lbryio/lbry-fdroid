@@ -89,7 +89,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -830,7 +829,7 @@ public class FileViewFragment extends BaseFragment implements
         }
     }
 
-    private View.OnClickListener bellIconListener = new View.OnClickListener()  {
+    private final View.OnClickListener bellIconListener = new View.OnClickListener()  {
         @Override
         public void onClick(View view) {
             if (claim != null && claim.getSigningChannel() != null) {
@@ -866,7 +865,7 @@ public class FileViewFragment extends BaseFragment implements
         }
     };
 
-    private View.OnClickListener followUnfollowListener = new View.OnClickListener() {
+    private final View.OnClickListener followUnfollowListener = new View.OnClickListener() {
         @Override
         public void onClick(final View view) {
             if (claim != null && claim.getSigningChannel() != null) {
@@ -1053,17 +1052,12 @@ public class FileViewFragment extends BaseFragment implements
                 }
 
                 if (claim != null) {
-                    CreateSupportDialogFragment dialog = CreateSupportDialogFragment.newInstance();
-                    dialog.setClaim(claim);
-                    dialog.setListener(new CreateSupportDialogFragment.CreateSupportListener() {
-                        @Override
-                        public void onSupportCreated(BigDecimal amount, boolean isTip) {
-                            double sentAmount = amount.doubleValue();
-                            String message = getResources().getQuantityString(
-                                    isTip ? R.plurals.you_sent_a_tip : R.plurals.you_sent_a_support, sentAmount == 1.0 ? 1 : 2,
-                                    new DecimalFormat("#,###.##").format(sentAmount));
-                            Snackbar.make(root.findViewById(R.id.file_view_claim_display_area), message, Snackbar.LENGTH_LONG).show();
-                        }
+                    CreateSupportDialogFragment dialog = CreateSupportDialogFragment.newInstance(claim, (amount, isTip) -> {
+                        double sentAmount = amount.doubleValue();
+                        String message = getResources().getQuantityString(
+                                isTip ? R.plurals.you_sent_a_tip : R.plurals.you_sent_a_support, sentAmount == 1.0 ? 1 : 2,
+                                new DecimalFormat("#,###.##").format(sentAmount));
+                        Snackbar.make(root.findViewById(R.id.file_view_claim_display_area), message, Snackbar.LENGTH_LONG).show();
                     });
                     Context context = getContext();
                     if (context instanceof MainActivity) {
@@ -1082,15 +1076,10 @@ public class FileViewFragment extends BaseFragment implements
                 }
 
                 if (claim != null) {
-                    RepostClaimDialogFragment dialog = RepostClaimDialogFragment.newInstance();
-                    dialog.setClaim(claim);
-                    dialog.setListener(new RepostClaimDialogFragment.RepostClaimListener() {
-                        @Override
-                        public void onClaimReposted(Claim claim) {
-                            Context context = getContext();
-                            if (context instanceof MainActivity) {
-                                ((MainActivity) context).showMessage(R.string.content_successfully_reposted);
-                            }
+                    RepostClaimDialogFragment dialog = RepostClaimDialogFragment.newInstance(claim, claim -> {
+                        Context context = getContext();
+                        if (context instanceof MainActivity) {
+                            ((MainActivity) context).showMessage(R.string.content_successfully_reposted);
                         }
                     });
                     Context context = getContext();
@@ -2431,7 +2420,7 @@ public class FileViewFragment extends BaseFragment implements
 
     private void resolveCommentPosters() {
         if (commentListAdapter != null) {
-            long st = System.currentTimeMillis();;
+            long st = System.currentTimeMillis();
             List<String> urlsToResolve = new ArrayList<>(commentListAdapter.getClaimUrlsToResolve());
             if (urlsToResolve.size() > 0) {
                 ResolveTask task = new ResolveTask(urlsToResolve, Lbry.LBRY_TV_CONNECTION_STRING, null, new ClaimListResultHandler() {
@@ -2709,7 +2698,7 @@ public class FileViewFragment extends BaseFragment implements
         dailyViewTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private ClaimRewardTask.ClaimRewardHandler eligibleRewardHandler = new ClaimRewardTask.ClaimRewardHandler() {
+    private final ClaimRewardTask.ClaimRewardHandler eligibleRewardHandler = new ClaimRewardTask.ClaimRewardHandler() {
         @Override
         public void onSuccess(double amountClaimed, String message) {
             if (Helper.isNullOrEmpty(message)) {
@@ -2878,7 +2867,7 @@ public class FileViewFragment extends BaseFragment implements
     }
 
     private static class LbryWebViewClient extends WebViewClient {
-        private Context context;
+        private final Context context;
         public LbryWebViewClient(Context context) {
             this.context = context;
         }

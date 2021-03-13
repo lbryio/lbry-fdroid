@@ -110,6 +110,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ConnectException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -210,6 +211,7 @@ import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.P;
 
 public class MainActivity extends AppCompatActivity implements SdkStatusListener,
         SharedPreferences.OnSharedPreferenceChangeListener,
@@ -243,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     public static boolean startingFilePickerActivity = false;
     public static boolean startingShareActivity = false;
     public static boolean startingPermissionRequest = false;
-    public static boolean startingSignInFlowActivity = false;
+    public static final boolean startingSignInFlowActivity = false;
 
     private ActionMode actionMode;
     @Getter
@@ -383,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     private List<FetchClaimsListener> fetchClaimsListeners;
     private List<FetchChannelsListener> fetchChannelsListeners;
     @Getter
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private boolean walletBalanceUpdateScheduled;
     private boolean shouldOpenUserSelectedMenuItem;
     private boolean walletSyncScheduled;
@@ -788,9 +790,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
 
     public void removeNavFragment(Class fragmentClass, int navItemId) {
         String key = buildNavFragmentKey(fragmentClass, navItemId, null);
-        if (openNavFragments.containsKey(key)) {
-            openNavFragments.remove(key);
-        }
+        openNavFragments.remove(key);
     }
 
     public void addFetchChannelsListener(FetchChannelsListener listener) {
@@ -984,7 +984,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         openFragment(RewardsFragment.class, true, NavMenuItem.ID_ITEM_REWARDS);
     }
 
-    private FragmentManager.OnBackStackChangedListener backStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
+    private final FragmentManager.OnBackStackChangedListener backStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
         @Override
         public void onBackStackChanged() {
             FragmentManager manager = getSupportFragmentManager();
@@ -1743,7 +1743,7 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
         if (!Helper.isNullOrEmpty(encryptedAuthToken)) {
             try {
                 Lbryio.AUTH_TOKEN = new String(Utils.decrypt(
-                        Base64.decode(encryptedAuthToken, Base64.NO_WRAP), this, Lbry.KEYSTORE), "UTF8");
+                        Base64.decode(encryptedAuthToken, Base64.NO_WRAP), this, Lbry.KEYSTORE), StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 // pass. A new auth token would have to be generated if the old one cannot be decrypted
                 Log.e(TAG, "Could not decrypt existing auth token.", ex);
@@ -2940,10 +2940,11 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
                 } else {
                     try {
                         LbryUri uri = LbryUri.parse(url);
+                        String checkedURL = url.startsWith(LbryUri.PROTO_DEFAULT) ? url : uri.toString();
                         if (uri.isChannel()) {
-                            openChannelUrl(url.startsWith(LbryUri.PROTO_DEFAULT) ? url : uri.toString());
+                            openChannelUrl(checkedURL);
                         } else {
-                            openFileUrl(url.startsWith(LbryUri.PROTO_DEFAULT) ? url : uri.toString());
+                            openFileUrl(checkedURL);
                         }
                     } catch (LbryUriException ex) {
                         // pass
@@ -3199,8 +3200,8 @@ public class MainActivity extends AppCompatActivity implements SdkStatusListener
     }
 
     private static class CheckSdkReadyTask extends AsyncTask<Void, Void, Boolean> {
-        private Context context;
-        private List<SdkStatusListener> listeners;
+        private final Context context;
+        private final List<SdkStatusListener> listeners;
 
         public CheckSdkReadyTask(Context context, List<SdkStatusListener> listeners) {
             this.context = context;
