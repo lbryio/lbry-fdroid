@@ -121,15 +121,16 @@ public class VerificationActivity extends FragmentActivity implements SignInList
             } else if (flow == VERIFICATION_FLOW_REWARDS) {
                 User user = Lbryio.currentUser;
                 // disable phone verification for now
-                /*if (!user.isIdentityVerified()) {
+                if (!user.isIdentityVerified()) {
                     // phone number verification required
                     viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_PHONE, false);
                     flowHandled = true;
-                } else */
-                if (!user.isRewardApproved()) {
-                    // manual verification required
-                    viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL, false);
-                    flowHandled = true;
+                } else {
+                    if (!user.isRewardApproved()) {
+                        // manual verification required
+                        viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL, false);
+                        flowHandled = true;
+                    }
                 }
             }
 
@@ -140,6 +141,11 @@ public class VerificationActivity extends FragmentActivity implements SignInList
                 return;
             }
         }
+    }
+
+    public void showPhoneVerification() {
+        ViewPager2 viewPager = findViewById(R.id.verification_pager);
+        viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_PHONE, false);
     }
 
     public void showLoading() {
@@ -155,8 +161,12 @@ public class VerificationActivity extends FragmentActivity implements SignInList
 
     @Override
     public void onBackPressed() {
-        // ignore back press
-        return;
+        ViewPager2 viewPager = findViewById(R.id.verification_pager);
+
+        if (viewPager.getCurrentItem() != VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL)
+            viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL);
+        else
+            super.onBackPressed();
     }
 
     public void onEmailAdded(String email) {
@@ -213,20 +223,18 @@ public class VerificationActivity extends FragmentActivity implements SignInList
                     ViewPager2 viewPager = findViewById(R.id.verification_pager);
                     // for rewards, (show phone verification if not done, or manual verification if required)
                     if (flow == VERIFICATION_FLOW_REWARDS) {
-                        // skipping phone verification
-                        /*if (!user.isIdentityVerified()) {
+                        if (!user.isIdentityVerified()) {
                             // phone number verification required
                             viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_PHONE, false);
-                        } else
-                        */
-                        if (!user.isRewardApproved()) {
-
-                            // manual verification required
-                            viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL, false);
                         } else {
-                            // fully verified
-                            setResult(RESULT_OK);
-                            finish();
+                            if (!user.isRewardApproved()) {
+                                // manual verification required
+                                viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL, false);
+                            } else {
+                                // fully verified
+                                setResult(RESULT_OK);
+                                finish();
+                            }
                         }
                     } else if (flow == VERIFICATION_FLOW_WALLET) {
                         // for wallet sync, if password unlock is required, show password entry page
@@ -264,6 +272,7 @@ public class VerificationActivity extends FragmentActivity implements SignInList
                     return;
                 }
 
+                findViewById(R.id.verification_close_button).setVisibility(View.VISIBLE);
                 // show manual verification page if the user is still not reward approved
                 ViewPager2 viewPager = findViewById(R.id.verification_pager);
                 viewPager.setCurrentItem(VerificationPagerAdapter.PAGE_VERIFICATION_MANUAL, false);

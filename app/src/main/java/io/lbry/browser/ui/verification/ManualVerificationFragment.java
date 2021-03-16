@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import io.lbry.browser.R;
+import io.lbry.browser.VerificationActivity;
 import io.lbry.browser.listener.SignInListener;
 import io.lbry.browser.utils.Helper;
 import lombok.Setter;
