@@ -14,8 +14,8 @@ android {
         applicationId "io.lbry.browser"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1700
-        versionName "0.17.0"
+        versionCode 1701
+        versionName "0.17.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -119,7 +119,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    __32bitImplementation 'io.lbry:lbrysdk32:0.91.0'
-//    __64bitImplementation 'io.lbry:lbrysdk64:0.91.0'
+    __32bitImplementation 'io.lbry:lbrysdk32:0.100.0'
+    //__64bitImplementation 'io.lbry:lbrysdk64:0.100.0'
+    //__64bitImplementation(name: 'lbrysdk', ext: 'aar')
 }
 
