@@ -1,2 +1,6 @@
 With LBRY, you own your data. You control the network. Indeed, you are the network.
 Hollywood films, college lessons, amazing streamers and more on the first media network ruled by you.
+
+AntiFeatures:
+  * NonFreeNet - app needs to connect to lbry.com else it can't function
+  * Tracking - as described here: https://lbry.com/faq/privacy-and-data
